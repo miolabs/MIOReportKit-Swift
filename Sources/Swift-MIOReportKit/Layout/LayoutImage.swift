@@ -16,11 +16,10 @@ public class Image: LayoutItem {
         self.url = url
         self.imgSize = Size( width: width, height: height )
         super.init( flex, id )
-        self.dimensions = Size( width: width, height: height )
     }
     
-    override func setDimension(_ dim: Size) {
-        dimensions = imgSize
+    override func meassure ( _ context: RenderContext ) {
+        size = self.imgSize
     }
     
     override func setValue ( _ value: Any ) throws {

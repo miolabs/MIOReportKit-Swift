@@ -43,22 +43,20 @@ public class Container: LayoutItem {
         
         for c in children {
             c.meassure( context )
-            dim = dim.join( c.dimensions, growDirection )
+            dim = dim.join( c.size, growDirection )
         }
 
-        if flex == 0 {
-            dimensions = dim
-        }
+        size = dim
     }
     
     override func setDimension(_ dim: Size) {
-        super.setDimension( dim )
+        super.setDimension( flex == 0 ? size : dim )
         
-        for c in children { c.setDimension( c.dimensions ) }
+        for c in children { c.setDimension( dimensions ) }
     }
     
-    override func setCoordinates ( ) {
-        for c in children { c.setCoordinates( ) }
+    override func setCoordinates ( _ x: Float, _ y: Float ) {
+        for c in children { c.setCoordinates( x, y ) }
     }
     
     override func render ( _ context: RenderContext ) {

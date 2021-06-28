@@ -7,12 +7,12 @@
 
 import Foundation
 
-class Text: LayoutItem {
-    var text: String
+public class Text: LayoutItem {
+    public var text: String
     
-    init ( _ text: String, _ id: String? = nil ) {
+    public init ( _ text: String, flex: Int = 0, id: String? = nil ) {
         self.text = text
-        super.init( 0, id )
+        super.init( flex, id )
     }
     
     override func setValue(_ value: Any) throws {

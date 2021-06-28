@@ -31,14 +31,11 @@ public class Layout: AddProtocol {
 
     
     public func render ( _ context: RenderContext ) {
-        // Overwritten by meassure pass
-        let initialSize = rootItem.dimensions
-        
         context.beginRender( rootItem )
             rootItem.meassure( context )
             // This triggers resizing in children that has flex
-            rootItem.setDimension( initialSize )
-            rootItem.setCoordinates( )
+            rootItem.setDimension( rootItem.dimensions )
+            rootItem.setCoordinates( 0, 0 )
             rootItem.render( context )
         context.endRender( )
     }

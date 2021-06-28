@@ -4,7 +4,7 @@
     final class Swift_MIOReportKitTests: XCTestCase {
         func testText ( ) throws {
             let page = A4( )
-            let text = Text( "Hello World", "ID1" )
+            let text = Text( "Hello World", id: "ID1" )
             let layout = Layout( page )
             
             page.add( text )
@@ -38,8 +38,8 @@
             let row    = HStack( )
             let layout = Layout( page )
 
-            row.add( Text( "Hello ", "ID1" ) )
-            row.add( Text( "Word", "ID2" ) )
+            row.add( Text( "Hello ", id: "ID1" ) )
+            row.add( Text( "Word", id: "ID2" ) )
 
             page.add( row )
 
@@ -66,8 +66,8 @@
             let row    = VStack( )
             let layout = Layout( page )
 
-            row.add( Text( "Hello ", "ID1" ) )
-            row.add( Text( "World", "ID2" ) )
+            row.add( Text( "Hello ", id: "ID1" ) )
+            row.add( Text( "World", id: "ID2" ) )
 
             page.add( row )
             
@@ -88,18 +88,122 @@
             let render = HTMLRender( )
             let page   = A4( )
             let img    = Image( url: "dual-link.com/img.jpg", width: 200, height: 100 )
+            let container = Container( )
             let layout = Layout( page )
             
-            page.add( img )
+            container.add( img )
+            page.add( container )
             
             layout.render( render )
             
             XCTAssertEqual( String( data: render.output( ), encoding: .utf8 ), """
 <div class="page a4">
+<div>
 <img src="dual-link.com/img.jpg" width="200" height="100"/>
 </div>
-""" )            
+</div>
+""" )
         }
+        
+
+        func testVStackFlex3 ( ) throws {
+            let render = HTMLRender( )
+            let page   = A4( )
+            let row    = HStack( 1 )
+            let layout = Layout( page )
+
+            row.add( LayoutItem( 1 ) )
+            row.add( Text( "Hello" ) )
+            row.add( LayoutItem( 2 ) )
+            row.add( Text( "World" ) )
+            row.add( LayoutItem( 1 ) )
+            page.add( row )
+            
+            layout.render( render )
+            
+            XCTAssertEqual( String( data: render.output( ), encoding: .utf8 ), """
+<div class="page a4">
+<div class="row">
+<div class="d-flex" style="flex:1"></div>
+<div>Hello</div>
+<div class="d-flex" style="flex:2"></div>
+<div>World</div>
+<div class="d-flex" style="flex:1"></div>
+</div>
+</div>
+""" )
+        }
+        
+        func testTable ( ) throws {
+            let render = HTMLRender( )
+            let page   = A4( )
+            let row    = HStack( 1 )
+            let layout = Layout( page )
+            let table  = Table( )
+            
+            table.addColumn( "population", "Population" )
+            table.addColumn( "country", "Country" )
+            
+            table.addRow( [ "population": 1234  , "country": "Spain"   ] )
+            table.addRow( [ "population": 12    , "country": "France"  ] )
+            table.addRow( [ "population": 123456, "country": "Germany-Holland" ] )
+
+            row.add( LayoutItem( 1 ) )
+            row.add( table )
+            row.add( LayoutItem( 1 ) )
+            page.add( row )
+            
+            layout.render( render )
+            
+            XCTAssertEqual( String( data: render.output( ), encoding: .utf8 ), """
+<div class="page a4">
+<div class="row">
+<div class="d-flex" style="flex:1"></div>
+<div class="table-fixed-header">
+  <div class="table-container">
+    <div class="table-header">
+        <table>
+            <colgroup>
+<col style="width: 0.0;">
+<col style="width: 0.0;">
+            </colgroup>
+            <thead class="table-thead">
+                <tr>
+<th class="table-cell">Population</th>
+<th class="table-cell">Country</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+    <div class="table-body" style="overflow-y: scroll; max-height: 240px;">
+        <table>
+            <colgroup>
+<col style="width: 0.0;">
+<col style="width: 0.0;">
+            </colgroup>
+            <tbody class="table-tbody">
+                <tr aria-hidden="true" class="table-measure-row" style="height: 0px; font-size: 0px;">
+<td style="padding: 0px; border: 0px; height: 0px;"><div style="height: 0px; overflow: hidden;">&nbsp;</div></td>
+<td style="padding: 0px; border: 0px; height: 0px;"><div style="height: 0px; overflow: hidden;">&nbsp;</div></td>
+                </tr>
+<tr data-row-key="0" class="table-row"><td class="table-cell"><span class="table-row-indent" style="padding-left: 0px;"></span>1234</td>
+<td class="table-cell"><span class="table-row-indent" style="padding-left: 0px;"></span>Spain</td></tr>
+<tr data-row-key="0" class="table-row"><td class="table-cell"><span class="table-row-indent" style="padding-left: 0px;"></span>12</td>
+<td class="table-cell"><span class="table-row-indent" style="padding-left: 0px;"></span>France</td></tr>
+<tr data-row-key="0" class="table-row"><td class="table-cell"><span class="table-row-indent" style="padding-left: 0px;"></span>123456</td>
+<td class="table-cell"><span class="table-row-indent" style="padding-left: 0px;"></span>Germany-Holland</td></tr>
+            </tbody>
+        </table>
+    </div>
+  </div>
+</div>
+<div class="d-flex" style="flex:1"></div>
+</div>
+</div>
+""" )
+        }
+
+        
         
         func testText_TR ( ) throws {
             let page = Page( Size( width: 80, height: 0 ) )
@@ -210,4 +314,72 @@ Hello                              World
           IIIIIIIIIIIIIIIIIIII
 """ )
         }
+
+        
+        func testTable_TR ( ) throws {
+            let render = TextRender( )
+            let page   = Page( Size( width: 40, height: 0 ) )
+            let row    = HStack( 1 )
+            let layout = Layout( page )
+            let table  = Table( )
+            
+            table.addColumn( "population", "Population" )
+            table.addColumn( "country", "Country" )
+            
+            table.addRow( [ "population": 1234  , "country": "Spain"   ] )
+            table.addRow( [ "population": 12    , "country": "France"  ] )
+            table.addRow( [ "population": 123456, "country": "Germany-Holland" ] )
+
+            row.add( LayoutItem( 1 ) )
+            row.add( table )
+            row.add( LayoutItem( 1 ) )
+            page.add( row )
+            
+            layout.render( render )
+            
+            XCTAssertEqual( String( data: render.output( ), encoding: .utf8 ), """
+      +------------+-----------------+
+      | Population |         Country |
+      +------------+-----------------+
+      |       1234 |           Spain |
+      +------------+-----------------+
+      |         12 |          France |
+      +------------+-----------------+
+      |     123456 | Germany-Holland |
+      +------------+-----------------+
+""" )
+        }
+
+    func testTableFull_TR ( ) throws {
+            let render = TextRender( )
+            let page   = Page( Size( width: 40, height: 0 ) )
+            let row    = HStack( 1 )
+            let layout = Layout( page )
+            let table  = Table( )
+            
+            table.addColumn( "population", "Population" )
+            table.addColumn( "country", "Country" )
+            
+            table.addRow( [ "population": 1234  , "country": "Spain"   ] )
+            table.addRow( [ "population": 12    , "country": "France"  ] )
+            table.addRow( [ "population": 123456, "country": "Germany-Holland" ] )
+
+            row.add( table )
+            page.add( row )
+            
+            layout.render( render )
+            
+            XCTAssertEqual( String( data: render.output( ), encoding: .utf8 ), """
+      +------------+-----------------+
+      | Population |         Country |
+      +------------+-----------------+
+      |       1234 |           Spain |
+      +------------+-----------------+
+      |         12 |          France |
+      +------------+-----------------+
+      |     123456 | Germany-Holland |
+      +------------+-----------------+
+""" )
+        }
+
 }

@@ -19,7 +19,7 @@ public struct Size {
     var height: Float = 0
         
     public func join ( _ s: Size, _ dir: SizeGrowDirection ) -> Size {
-        return Size( width:  dir == .vertical   ? max( width , s.width  ) : width  + s.width
+        return Size( width:  dir == .horizontal ? width  + s.width        : max( width , s.width )
                    , height: dir == .horizontal ? max( height, s.height ) : height + s.height )
     }
 }
