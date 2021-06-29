@@ -18,14 +18,20 @@ public class HStack: Container {
         let fixed_size = children.reduce( 0 ) { total, child in total + (child.flex == 0 ? child.size.width : 0) }
         let flex_size = max( 0, Float(dim.width - fixed_size) / Float(num_flex) )
         
+        var sz = Size( width: 0, height: 0 )
         for c in children {
             c.setDimension( Size( width: c.flex > 0 ? Float(c.flex) * flex_size : c.size.width
                                 , height: c.size.height))
+            
+            sz = sz.join( c.dimensions, .horizontal )
         }
+        dimensions = sz
     }
     
     override func setCoordinates ( _ x: Float, _ y: Float ) {
-        super.setCoordinates( x, y )
+        self.x = x
+        self.y = y
+
         if children.count == 0 { return }
         
         var posX: Float = 0
@@ -49,15 +55,20 @@ public class VStack: Container {
         let fixed_size = children.reduce( 0 ) { total, child in total + (child.flex == 0 ? child.size.height : 0) }
         let flex_size = max( 0, Float(dim.width - fixed_size) / Float(num_flex) )
         
+        var sz = Size( width: 0, height: 0 )
         for c in children {
             c.setDimension( Size( width: dim.width
                                 , height: c.flex > 0 ? Float(c.flex) * flex_size : c.size.height ))
+
+            sz = sz.join( c.dimensions, .vertical )
         }
+        dimensions = sz
     }
 
     
     override func setCoordinates ( _ x: Float, _ y: Float ) {
-        super.setCoordinates( x, y )
+        self.x = x
+        self.y = y
         
         if children.count == 0 { return }
         

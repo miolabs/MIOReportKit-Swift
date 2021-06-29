@@ -7,11 +7,27 @@
 
 import Foundation
 
+public enum TextAlign: Int {
+    case left   = 0
+    case center = 1
+    case right  = 2
+}
+
+public enum TextWrap: Int {
+    case wrap   = 0
+    case noWrap = 1
+}
+
 public class Text: LayoutItem {
     public var text: String
+    public var align: TextAlign
+    public var wrap: TextWrap
     
-    public init ( _ text: String, flex: Int = 0, id: String? = nil ) {
-        self.text = text
+    public init ( _ text: String, flex: Int = 0, id: String? = nil, align: TextAlign = .left, wrap: TextWrap = .wrap  ) {
+        self.text  = text
+        self.align = align
+        self.wrap  = wrap
+        
         super.init( flex, id )
     }
     
@@ -20,8 +36,4 @@ public class Text: LayoutItem {
             text = new_text
         }
     }
-}
-
-class TextBox: LayoutItem {
-    
 }

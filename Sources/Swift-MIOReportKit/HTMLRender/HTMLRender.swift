@@ -12,7 +12,14 @@ public class HTMLRender: RenderContext {
     
     override func renderItem ( _ item: LayoutItem ) {
         if let text = item as? Text {
-            m_output.append( "<div>\(text.text)</div>")
+            func align_classname ( ) -> String {
+              return text.align == .left   ? "left"
+                   : text.align == .center ? "center"
+                   : text.align == .right  ? "right"
+                   :                         "unkown"
+            }
+            
+            m_output.append( "<div class=\"text-\(align_classname())\">\(text.text)</div>")
         } else if let img = item as? Image {
             m_output.append( "<img src=\"\(img.url)\" width=\"\(Int(img.dimensions.width))\" height=\"\(Int(img.dimensions.height))\"/>")
         } else {

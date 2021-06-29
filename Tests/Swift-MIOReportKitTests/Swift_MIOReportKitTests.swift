@@ -17,7 +17,7 @@
             
             XCTAssertEqual( String( data: render.output( ), encoding: .utf8 ), """
 <div class="page a4">
-<div>Hello World</div>
+<div class="text-left">Hello World</div>
 </div>
 """ )
             
@@ -27,7 +27,7 @@
 
             XCTAssertEqual( String( data: render.output( ), encoding: .utf8 ), """
 <div class="page a4">
-<div>Bye bye World</div>
+<div class="text-left">Bye bye World</div>
 </div>
 """ )
         }
@@ -52,8 +52,8 @@
             XCTAssertEqual( String( data: render.output( ), encoding: .utf8 ), """
 <div class="page a4">
 <div class="row">
-<div>Hello </div>
-<div>World!!!</div>
+<div class="text-left">Hello </div>
+<div class="text-left">World!!!</div>
 </div>
 </div>
 """ )
@@ -76,8 +76,8 @@
             XCTAssertEqual( String( data: render.output( ), encoding: .utf8 ), """
 <div class="page a4">
 <div class="col">
-<div>Hello </div>
-<div>World</div>
+<div class="text-left">Hello </div>
+<div class="text-left">World</div>
 </div>
 </div>
 """ )
@@ -125,9 +125,9 @@
 <div class="page a4">
 <div class="row">
 <div class="d-flex" style="flex:1"></div>
-<div>Hello</div>
+<div class="text-left">Hello</div>
 <div class="d-flex" style="flex:2"></div>
-<div>World</div>
+<div class="text-left">World</div>
 <div class="d-flex" style="flex:1"></div>
 </div>
 </div>
@@ -209,16 +209,14 @@
             let page = Page( Size( width: 80, height: 0 ) )
             let text = Text( "Hello World" )
             let layout = Layout( page )
-            
+            // Text is dimensioned to expand to use all the container (Page is VSTACK)
             page.add( text )
             
             let render = TextRender( )
             
             layout.render( render )
             
-            XCTAssertEqual( String( data: render.output( ), encoding: .utf8 ), """
-Hello World
-""" )
+            XCTAssertEqual( String( data: render.output( ), encoding: .utf8 ), "Hello World                                                                     " )
         }
 
         func testHStack_TR ( ) throws {
@@ -244,15 +242,15 @@ Hello World
             let row    = VStack( )
             let layout = Layout( page )
 
-            row.add( Text( "Hello" ) )
-            row.add( Text( "World" ) )
+            row.add( Text( "Hello", align: .right ) )
+            row.add( Text( "World", align: .right ) )
             page.add( row )
             
             layout.render( render )
             
             XCTAssertEqual( String( data: render.output( ), encoding: .utf8 ), """
-Hello
-World
+                                                                           Hello
+                                                                           World
 """ )
         }
 
@@ -323,8 +321,8 @@ Hello                              World
             let layout = Layout( page )
             let table  = Table( )
             
-            table.addColumn( "population", "Population" )
-            table.addColumn( "country", "Country" )
+            table.addColumn( "population", "Population", align: .center )
+            table.addColumn( "country", "Country", align: .right )
             
             table.addRow( [ "population": 1234  , "country": "Spain"   ] )
             table.addRow( [ "population": 12    , "country": "France"  ] )
@@ -338,47 +336,47 @@ Hello                              World
             layout.render( render )
             
             XCTAssertEqual( String( data: render.output( ), encoding: .utf8 ), """
-      +------------+-----------------+
-      | Population |         Country |
-      +------------+-----------------+
-      |       1234 |           Spain |
-      +------------+-----------------+
-      |         12 |          France |
-      +------------+-----------------+
-      |     123456 | Germany-Holland |
-      +------------+-----------------+
+      +----------+---------------+
+      |Population|        Country|
+      +----------+---------------+
+      |   1234   |          Spain|
+      +----------+---------------+
+      |    12    |         France|
+      +----------+---------------+
+      |  123456  |Germany-Holland|
+      +----------+---------------+
 """ )
         }
 
     func testTableFull_TR ( ) throws {
-            let render = TextRender( )
-            let page   = Page( Size( width: 40, height: 0 ) )
-            let row    = HStack( 1 )
-            let layout = Layout( page )
-            let table  = Table( )
-            
-            table.addColumn( "population", "Population" )
-            table.addColumn( "country", "Country" )
-            
-            table.addRow( [ "population": 1234  , "country": "Spain"   ] )
-            table.addRow( [ "population": 12    , "country": "France"  ] )
-            table.addRow( [ "population": 123456, "country": "Germany-Holland" ] )
+        let render = TextRender( )
+        let page   = Page( Size( width: 40, height: 0 ) )
+        let row    = HStack( 1 )
+        let layout = Layout( page )
+        let table  = Table( flex: 1 )
+        
+        table.addColumn( "population", "Population", flex: 1, align: TextAlign.right )
+        table.addColumn( "country", "Country", align: TextAlign.left )
+        
+        table.addRow( [ "population": 1234  , "country": "Spain"   ] )
+        table.addRow( [ "population": 12    , "country": "France"  ] )
+        table.addRow( [ "population": 123456, "country": "Germany-Holland" ] )
 
-            row.add( table )
-            page.add( row )
-            
-            layout.render( render )
-            
-            XCTAssertEqual( String( data: render.output( ), encoding: .utf8 ), """
-      +------------+-----------------+
-      | Population |         Country |
-      +------------+-----------------+
-      |       1234 |           Spain |
-      +------------+-----------------+
-      |         12 |          France |
-      +------------+-----------------+
-      |     123456 | Germany-Holland |
-      +------------+-----------------+
+        row.add( table )
+        page.add( row )
+        
+        layout.render( render )
+        
+        XCTAssertEqual( String( data: render.output( ), encoding: .utf8 ), """
++-------------------------+---------------+
+|               Population|Country        |
++-------------------------+---------------+
+|                     1234|Spain          |
++-------------------------+---------------+
+|                       12|France         |
++-------------------------+---------------+
+|                   123456|Germany-Holland|
++-------------------------+---------------+
 """ )
         }
 
