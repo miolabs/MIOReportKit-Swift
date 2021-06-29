@@ -10,7 +10,7 @@ import Foundation
 public class TextRender: RenderContext {
     var lines: [String] = []
         
-    override func renderItem ( _ item: LayoutItem ) {
+    override open func renderItem ( _ item: LayoutItem ) {
         if let text = item as? Text {
             func pad ( _ length: Int ) -> String {
                 return String( repeating: " ", count: max( 0, length ) )
@@ -38,7 +38,7 @@ public class TextRender: RenderContext {
     }
 
     
-    override func beginContainer ( _ container: Container ) {
+    override open func beginContainer ( _ container: Container ) {
         if let table = container as? Table {
             func draw_border ( ) {
                 x = table.x
@@ -114,13 +114,13 @@ public class TextRender: RenderContext {
     }
     
     
-    override func beginRender ( _ root: Container ) {
+    override open func beginRender ( _ root: Container ) {
         reset()
         super.beginRender( root )
     }
     
     
-    override func meassure ( _ item: LayoutItem ) -> Size {
+    override open func meassure ( _ item: LayoutItem ) -> Size {
         if let text = item as? Text {
             return Size( width: Float( text.text.count ), height: 1 )
         }
@@ -128,7 +128,7 @@ public class TextRender: RenderContext {
         return Size( width: 0, height: 0 )
     }
     
-    override func output ( ) -> Data {
+    override open func output ( ) -> Data {
         return lines.joined( separator: "\n" ).data( using: .utf8 )!
     }
 }

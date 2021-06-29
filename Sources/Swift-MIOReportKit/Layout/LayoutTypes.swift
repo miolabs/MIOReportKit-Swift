@@ -17,6 +17,11 @@ public enum SizeGrowDirection: Int16 {
 public struct Size {
     var width : Float = 0
     var height: Float = 0
+    
+    public init( width: Float = 0, height: Float = 0 ) {
+        self.width  = width
+        self.height = height
+    }
         
     public func join ( _ s: Size, _ dir: SizeGrowDirection ) -> Size {
         return Size( width:  dir == .horizontal ? width  + s.width        : max( width , s.width )
@@ -41,7 +46,7 @@ public class Constraint {
     }
 }
 
-public class RenderContext {
+open class RenderContext {
     var fgColor: String
     var bgColor: String
     var font: FontStyle
@@ -50,7 +55,7 @@ public class RenderContext {
     var contraintStack: [Constraint]
     var containerStack: [Container]
     
-    init ( ) {
+    public init ( ) {
         fgColor = "#000000"
         bgColor = "#FFFFFF"
         font = FontStyle( )
@@ -60,20 +65,20 @@ public class RenderContext {
         containerStack = []
     }
     
-    func beginRender ( _ root: Container ) { containerStack = [root] }
-    func endRender ( ) { }
+    open func beginRender ( _ root: Container ) { containerStack = [root] }
+    open func endRender ( ) { }
     
-    func meassure ( _ item: LayoutItem ) -> Size { return Size( width: 0, height: 0 ) }
+    open func meassure ( _ item: LayoutItem ) -> Size { return Size( width: 0, height: 0 ) }
     
-    func renderItem ( _ item: LayoutItem ) { }
+    open func renderItem ( _ item: LayoutItem ) { }
     
-    func beginContainer ( _ container: Container ) {
+    open func beginContainer ( _ container: Container ) {
         containerStack.append( container )
     }
     
-    func endContainer ( ) {
+    open func endContainer ( ) {
         _ = containerStack.popLast()
     }
     
-    func output ( ) -> Data { return Data( ) }
+    open func output ( ) -> Data { return Data( ) }
 }

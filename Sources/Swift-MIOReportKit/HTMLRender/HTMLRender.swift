@@ -10,13 +10,13 @@ import Foundation
 public class HTMLRender: RenderContext {
     var m_output: [String] = []
     
-    override func renderItem ( _ item: LayoutItem ) {
+    override open func renderItem ( _ item: LayoutItem ) {
         if let text = item as? Text {
             func align_classname ( ) -> String {
-              return text.align == .left   ? "left"
+              return text.align == .left   ? "start"
                    : text.align == .center ? "center"
-                   : text.align == .right  ? "right"
-                   :                         "unkown"
+                   : text.align == .right  ? "end"
+                   :                         "start"
             }
             
             m_output.append( "<div class=\"text-\(align_classname())\">\(text.text)</div>")
@@ -31,17 +31,17 @@ public class HTMLRender: RenderContext {
         m_output = []
     }
     
-    override func output() -> Data {
+    override open func output() -> Data {
         return m_output.joined(separator: "\n").data( using: .utf8 )!
     }
     
     
-    override func beginContainer ( _ container: Container ) {
+    override open func beginContainer ( _ container: Container ) {
         if container is A4 {
             m_output.append( "<div class=\"page a4\">" )
         } else if let table = container as? Table {
             let header = (table.header as! HStack).children as! [Text]
-            let COLS = header.map{ "<col style=\"width: \($0.dimensions.width);\">" }.joined(separator: "\n")
+            let COLS = header.map{ "<col style=\"width: \(Int($0.dimensions.width))px;\"/>" }.joined(separator: "\n")
             
             let HEADER = header.map{ "<th class=\"table-cell\">\( $0.text)</th>" }.joined(separator: "\n")
             
@@ -68,7 +68,7 @@ public class HTMLRender: RenderContext {
             </thead>
         </table>
     </div>
-    <div class="table-body" style="overflow-y: scroll; max-height: 240px;">
+    <div class="table-body">
         <table>
             <colgroup>
 {{COLS}}
@@ -99,8 +99,16 @@ public class HTMLRender: RenderContext {
         super.beginContainer( container )
     }
     
-    override func endContainer ( ) {
+    override open func endContainer ( ) {
         m_output.append( "</div>" )
         super.endContainer()
+    }
+    
+    override open func meassure ( _ item: LayoutItem ) -> Size {
+        if let text = item as? Text {
+            return Size( width: Float( text.text.count ) * Float(8) / Float(60),  height: 1 )
+        }
+        
+        return Size( width: 0, height: 0 )
     }
 }
