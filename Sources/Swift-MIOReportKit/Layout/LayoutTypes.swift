@@ -14,6 +14,20 @@ public enum SizeGrowDirection: Int16 {
 }
 
 
+public enum ItemSize: Int {
+    case none = 0
+    case xxs  = 1
+    case xs   = 2
+    case s    = 3
+    case m    = 4
+    case l    = 5
+    case xl   = 6
+    case xxl  = 7
+    case h    = 8 // huge
+}
+
+
+
 public struct Size {
     var width : Float = 0
     var height: Float = 0

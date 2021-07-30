@@ -9,8 +9,25 @@ import Foundation
 
 public class HTMLRender: RenderContext {
     var m_output: [String] = []
+    var m_output_stack: [[String]] = []
     
+    func push_output ( ) {
+        m_output_stack.append( m_output )
+        m_output = []
+    }
+    
+    func pop_output ( ) -> String {
+        let ret = m_output.joined(separator: "\n")
+        
+        m_output = m_output_stack.last!
+        
+        return ret
+    }
+    
+
     override open func renderItem ( _ item: LayoutItem ) {
+        var styles: [String] = itemStyles( item )
+
         if let text = item as? Text {
             func align_classname ( ) -> String {
               return text.align == .left   ? "start"
@@ -19,11 +36,24 @@ public class HTMLRender: RenderContext {
                    :                         "start"
             }
             
-            m_output.append( "<div class=\"text-\(align_classname())\">\(text.text)</div>")
+            var extra_classes = ""
+            
+            if text.wrap == .noWrap { extra_classes  = " text-nowrap" }
+            if text.bold            { extra_classes += " fw-bold" }
+            if text.italic          { extra_classes += " fst-italic" }
+            
+            if text.text_size != .m { extra_classes += " text-sz-\(text.text_size.rawValue)" }
+            
+            m_output.append( "<div class=\"text-\(align_classname())\(extra_classes)\"\(renderStyles( styles ))>\(text.text)</div>")
         } else if let img = item as? Image {
             m_output.append( "<img src=\"\(img.url)\" width=\"\(Int(img.dimensions.width))\" height=\"\(Int(img.dimensions.height))\"/>")
+        } else if let spc = item as? Space {
+            styles.append( "width:\(Int(spc.size.width))px" )
+            styles.append( "height:\(Int(spc.size.height))px" )
+            
+            m_output.append( "<div\(renderStyles( styles ))></div>" )
         } else {
-            m_output.append( "<div class=\"d-flex\" style=\"flex:\(item.flex)\"></div>")
+            m_output.append( "<div class=\"d-flex\"\(renderStyles( styles ))></div>" )
         }
     }
     
@@ -37,24 +67,49 @@ public class HTMLRender: RenderContext {
     
     
     override open func beginContainer ( _ container: Container ) {
+        var styles: [String] = itemStyles( container )
+        
         if container is A4 {
-            m_output.append( "<div class=\"page a4\">" )
+            m_output.append( "<div class=\"page a4\"\(renderStyles( styles ))>" )
+        } else if let page = container as? Page {
+            if page.size.width  > 0 { styles.append( "width: \(Int(page.size.width))px" ) }
+            if page.size.height > 0 { styles.append( "height: \(Int(page.size.height))px" ) }
+            
+            m_output.append( "<div class=\"page\"\(renderStyles( styles ))>" )
         } else if let table = container as? Table {
             let header = (table.header as! HStack).children as! [Text]
             let COLS = header.map{ "<col style=\"width: \(Int($0.dimensions.width))px;\"/>" }.joined(separator: "\n")
             
-            let HEADER = header.map{ "<th class=\"table-cell\">\( $0.text)</th>" }.joined(separator: "\n")
+            push_output()
+            for h in header {
+                m_output.append( "<th class=\"table-cell\">" )
+                h.render( self )
+                m_output.append( "</th>" )
+            }
+            let HEADER = pop_output()
             
             let HIDDEN_ROW = header.map{ _ in "<td style=\"padding: 0px; border: 0px; height: 0px;\"><div style=\"height: 0px; overflow: hidden;\">&nbsp;</div></td>" }.joined(separator: "\n")
             
-            let DATA = table.body.children.map{ row in
-                let cols = (row as! HStack).children.map{ "<td class=\"table-cell\"><span class=\"table-row-indent\" style=\"padding-left: 0px;\"></span>\(($0 as! Text).text)</td>" }
+            push_output()
+            
+            for row in table.body.children {
+                m_output.append( "<tr data-row-key=\"0\" class=\"table-row\">" )
+                for col in (row as! HStack).children {
+                    m_output.append( "<td class=\"table-cell\"><span class=\"table-row-indent\" style=\"padding-left: 0px;\"></span>" )
+                    
+                    col.render( self )
+                    
+                    m_output.append( "</td>" )
                 
-                return "<tr data-row-key=\"0\" class=\"table-row\">" + cols.joined( separator: "\n" ) + "</tr>"
-            }.joined(separator: "\n")
+                }
+                
+                m_output.append( "</tr>" )
+            }
+            
+            let DATA = pop_output()
             
             let table = """
-<div class="table-fixed-header">
+<div class="table-fixed-header"\(renderStyles( styles ))>
   <div class="table-container">
     <div class="table-header">
         <table>
@@ -90,14 +145,32 @@ public class HTMLRender: RenderContext {
                      .replacingOccurrences(of: "{{DATA}}", with: DATA )
                 )
         } else if container is HStack {
-            m_output.append( "<div class=\"row\">" )
+            m_output.append( "<div class=\"row\"\(renderStyles( styles ))>" )
         } else if container is VStack {
-            m_output.append( "<div class=\"col\">" )
+            m_output.append( "<div class=\"col\"\(renderStyles( styles ))>" )
         } else {
-            m_output.append( "<div>" )
+            m_output.append( "<div\(renderStyles( styles ))>" )
         }
         super.beginContainer( container )
     }
+    
+    open func itemStyles ( _ item: LayoutItem ) -> [String] {
+        var styles: [String] = []
+        
+        if item.flex > 0 { styles.append( "flex: \(item.flex)" ) }
+        if item.bg_color != nil { styles.append( "background-color: \(item.bg_color!)") }
+        if item.fg_color != nil { styles.append( "color: \(item.fg_color!)") }
+
+        return styles
+    }
+    
+    
+    open func renderStyles ( _ styles: [String] ) -> String {
+        return styles.count > 0 ?
+                 " style=\"\(styles.joined(separator: ";"))\""
+               : ""
+    }
+
     
     override open func endContainer ( ) {
         m_output.append( "</div>" )
@@ -107,8 +180,13 @@ public class HTMLRender: RenderContext {
     override open func meassure ( _ item: LayoutItem ) -> Size {
         if let text = item as? Text {
             return Size( width: Float( text.text.count ) * Float(8) / Float(60),  height: 1 )
+        } else if let page = item as? Page {
+            return page.size
+        } else if let spc = item as? Space {
+            return Size( width: Float( spc.a.rawValue * 5 )
+                       , height: Float( spc.b.rawValue * 5 ) )
         }
-        
-        return Size( width: 0, height: 0 )
+            
+        return super.meassure( item )
     }
 }

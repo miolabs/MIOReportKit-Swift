@@ -123,8 +123,10 @@ public class TextRender: RenderContext {
     override open func meassure ( _ item: LayoutItem ) -> Size {
         if let text = item as? Text {
             return Size( width: Float( text.text.count ), height: 1 )
+        } else if let page = item as? Page {
+            return page.size
         }
-        
+
         return Size( width: 0, height: 0 )
     }
     

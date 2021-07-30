@@ -13,6 +13,17 @@ public class HStack: Container {
         growDirection = .horizontal
     }
     
+    
+    override func meassure (_ context: RenderContext ) {
+        super.meassure( context )
+
+        for c in children {
+            if let spc = c as? Space {
+                spc.size = Size( width: spc.size.width, height: size.height )
+            }
+        }
+    }
+    
     override func setDimension ( _ dim: Size ) {
         let num_flex: Int = children.reduce( 0 ) { total, child in total + child.flex }
         let fixed_size = children.reduce( 0 ) { total, child in total + (child.flex == 0 ? child.size.width : 0) }
@@ -48,6 +59,16 @@ public class VStack: Container {
     public override init ( _ flex: Int = 0, _ id: String? = nil ) {
         super.init( flex, id )
         growDirection = .vertical
+    }
+    
+    override func meassure(_ context: RenderContext) {
+        super.meassure( context )
+
+        for c in children {
+            if let spc = c as? Space {
+                spc.size = Size( width: size.width, height: spc.size.width )
+            }
+        }
     }
 
     override func setDimension ( _ dim: Size ) {

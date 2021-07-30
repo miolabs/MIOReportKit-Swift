@@ -19,6 +19,9 @@ public class LayoutItem {
     var y: Float
     var size: Size
     var dimensions: Size
+    var bg_color: String?
+    var fg_color: String?
+    var border_color: String?
     
     public init ( _ flex: Int = 0, _ id: String? = nil ) {
         self.id = id
@@ -27,6 +30,16 @@ public class LayoutItem {
         self.y = 0
         self.dimensions = Size( )
         self.size = Size( )
+    }
+    
+    public func bgColor ( _ bg: String ) -> LayoutItem {
+        bg_color = bg
+        return self
+    }
+        
+    public func fgColor ( _ fg: String ) -> LayoutItem {
+        fg_color = fg
+        return self
     }
         
     func setValue ( _ value: Any ) throws { }
