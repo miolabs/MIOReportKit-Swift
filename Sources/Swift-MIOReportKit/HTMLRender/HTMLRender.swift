@@ -29,6 +29,8 @@ public class HTMLRender: RenderContext {
         var styles: [String] = itemStyles( item )
 
         if let text = item as? Text {
+            var classes: [String] = []
+            
             func align_classname ( ) -> String {
               return text.align == .left   ? "start"
                    : text.align == .center ? "center"
@@ -36,15 +38,15 @@ public class HTMLRender: RenderContext {
                    :                         "start"
             }
             
-            var extra_classes = ""
+            classes.append( "text-\(align_classname())" )
             
-            if text.wrap == .noWrap { extra_classes  = " text-nowrap" }
-            if text.bold            { extra_classes += " fw-bold" }
-            if text.italic          { extra_classes += " fst-italic" }
+            if text.wrap == .noWrap { classes.append( "text-nowrap" ) }
+            if text.bold            { classes.append( "fw-bold"     ) }
+            if text.italic          { classes.append( "fst-italic"  ) }
             
-            if text.text_size != .m { extra_classes += " text-sz-\(text.text_size.rawValue)" }
+            if text.text_size != .m { classes.append( "text-sz-\(text.text_size.rawValue)" ) }
             
-            m_output.append( "<div class=\"text-\(align_classname())\(extra_classes)\"\(renderStyles( styles ))>\(text.text)</div>")
+            m_output.append( "<div \(renderClasses(classes))\(renderStyles( styles ))>\(text.text)</div>")
         } else if let img = item as? Image {
             m_output.append( "<img src=\"\(img.url)\" width=\"\(Int(img.dimensions.width))\" height=\"\(Int(img.dimensions.height))\"/>")
         } else if let spc = item as? Space {
@@ -107,9 +109,13 @@ public class HTMLRender: RenderContext {
             }
             
             let DATA = pop_output()
+            var classes = ["table-fixed-header"]
+            
+            if table.border { classes.append( "border" ) }
+            if table.hideHeader { classes.append( "hide-header" ) }
             
             let table = """
-<div class="table-fixed-header"\(renderStyles( styles ))>
+<div \(renderClasses( classes ))\(renderStyles( styles ))>
   <div class="table-container">
     <div class="table-header">
         <table>
@@ -168,6 +174,13 @@ public class HTMLRender: RenderContext {
     open func renderStyles ( _ styles: [String] ) -> String {
         return styles.count > 0 ?
                  " style=\"\(styles.joined(separator: ";"))\""
+               : ""
+    }
+    
+    
+    open func renderClasses ( _ classes: [String] ) -> String {
+        return classes.count > 0 ?
+                 " class=\"\(classes.joined(separator: " "))\""
                : ""
     }
 

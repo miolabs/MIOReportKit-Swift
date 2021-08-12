@@ -24,7 +24,8 @@ public class Table: FooterHeaderContainer {
     var body: VStack
     var max_col: [Float]
     var max_row: [Float]
-    var border: Bool
+    public var border: Bool
+    public var hideHeader: Bool
 
     public init ( flex: Int = 0, id: String? = nil ) {
         cols_key = []
@@ -32,6 +33,7 @@ public class Table: FooterHeaderContainer {
         max_col  = []
         max_row  = []
         border   = true
+        hideHeader = false
         
         super.init( header: HStack( ), footer: HStack( ) )
         self.flex = flex
@@ -53,14 +55,14 @@ public class Table: FooterHeaderContainer {
         tableHeader( ).add( Text( name, flex: flex, id: id, align: align, wrap: wrap ) )
     }
 
-    public func addRow ( _ dict: [String:Any] ) {
+    public func addRow ( _ dict: [String:Any], bold: Bool = false ) {
         let table_row = HStack( )
         
         for i in cols_key.indices {
             let key = cols_key[ i ]
             let col = tableHeaderCols()[ i ]
             
-            table_row.add( Text( "\(dict[ key ] ?? "")", align: col.align, wrap: col.wrap ) )
+            table_row.add( Text( "\(dict[ key ] ?? "")", bold: bold, align: col.align, wrap: col.wrap ) )
         }
         
         body.add( table_row )
