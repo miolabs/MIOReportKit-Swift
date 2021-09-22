@@ -55,14 +55,14 @@ public class Table: FooterHeaderContainer {
         tableHeader( ).add( Text( name, flex: flex, id: id, align: align, wrap: wrap ) )
     }
 
-    public func addRow ( _ dict: [String:Any], bold: Bool = false ) {
+    public func addRow ( _ dict: [String:Any], bold: Bool = false, italic: Bool = false ) {
         let table_row = HStack( )
         
         for i in cols_key.indices {
             let key = cols_key[ i ]
             let col = tableHeaderCols()[ i ]
             
-            table_row.add( Text( "\(dict[ key ] ?? "")", bold: bold, align: col.align, wrap: col.wrap ) )
+            table_row.add( Text( "\(dict[ key ] ?? "")", bold: bold, italic: italic, align: col.align, wrap: col.wrap ) )
         }
         
         body.add( table_row )
