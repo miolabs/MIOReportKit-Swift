@@ -1,7 +1,7 @@
     import XCTest
-    @testable import Swift_MIOReportKit
+    @testable import MIOReportKit_Swift
 
-    final class Swift_MIOReportKitTests: XCTestCase {
+    final class MIOReportKit_SwiftTests: XCTestCase {
         func testText ( ) throws {
             let page = A4( )
             let text = Text( "Hello World", id: "ID1" )
