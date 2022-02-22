@@ -18,7 +18,7 @@ public class Image: LayoutItem {
         super.init( flex, id )
     }
     
-    override func meassure ( _ context: RenderContext ) {
+    override open func meassure ( _ context: RenderContext ) {
         size = self.imgSize
     }
     

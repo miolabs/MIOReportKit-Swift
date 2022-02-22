@@ -37,7 +37,7 @@ public class Container: LayoutItem {
         }
     }
     
-    override func meassure ( _ context: RenderContext )
+    override open func meassure ( _ context: RenderContext )
     {
         var dim = Size( )
         
@@ -62,7 +62,7 @@ public class Container: LayoutItem {
     override func render ( _ context: RenderContext ) {
         context.beginContainer( self )
           for c in children { c.render( context ) }
-        context.endContainer( )
+        context.endContainer( self )
     }
 }
 

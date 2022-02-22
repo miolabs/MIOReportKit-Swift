@@ -90,7 +90,7 @@ open class RenderContext {
         containerStack.append( container )
     }
     
-    open func endContainer ( ) {
+    open func endContainer ( _ container: Container ) {
         _ = containerStack.popLast()
     }
     

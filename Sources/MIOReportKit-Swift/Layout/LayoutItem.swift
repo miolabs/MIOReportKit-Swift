@@ -12,7 +12,7 @@ public protocol AddProtocol {
     func onItemAdded ( _ idem: LayoutItem )
 }
 
-public class LayoutItem {
+open class LayoutItem {
     var id: String?
     var flex: Int
     var x: Float
@@ -44,7 +44,7 @@ public class LayoutItem {
         
     func setValue ( _ value: Any ) throws { }
     
-    func meassure ( _ context: RenderContext ) {
+    open func meassure ( _ context: RenderContext ) {
         self.size = context.meassure( self )
     }
 

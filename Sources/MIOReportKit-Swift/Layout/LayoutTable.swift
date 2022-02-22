@@ -72,7 +72,7 @@ public class Table: FooterHeaderContainer {
         body.add( row )
     }
     
-    override func meassure ( _ context: RenderContext ) {
+    override open func meassure ( _ context: RenderContext ) {
         var sz = Size( )
         
         header!.meassure( context )

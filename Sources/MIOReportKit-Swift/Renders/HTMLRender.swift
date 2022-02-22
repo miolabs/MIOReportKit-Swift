@@ -185,9 +185,9 @@ public class HTMLRender: RenderContext {
     }
 
     
-    override open func endContainer ( ) {
+    override open func endContainer ( _ container: Container ) {
         m_output.append( "</div>" )
-        super.endContainer()
+        super.endContainer( container )
     }
     
     override open func meassure ( _ item: LayoutItem ) -> Size {

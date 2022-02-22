@@ -14,7 +14,7 @@ public class HStack: Container {
     }
     
     
-    override func meassure (_ context: RenderContext ) {
+    override open func meassure (_ context: RenderContext ) {
         super.meassure( context )
 
         for c in children {
@@ -61,7 +61,7 @@ public class VStack: Container {
         growDirection = .vertical
     }
     
-    override func meassure(_ context: RenderContext) {
+    override open func meassure(_ context: RenderContext) {
         super.meassure( context )
 
         for c in children {
