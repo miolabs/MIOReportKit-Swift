@@ -24,6 +24,7 @@ public class Container: LayoutItem {
     public func add ( _ item: LayoutItem ) {
         children.append( item )
         
+        item.parent = self
         if delegate != nil {
             item.notifyAdded( delegate! )
         }

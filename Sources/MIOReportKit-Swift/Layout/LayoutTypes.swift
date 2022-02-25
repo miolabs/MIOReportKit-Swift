@@ -95,4 +95,6 @@ open class RenderContext {
     }
     
     open func output ( ) -> Data { return Data( ) }
+    
+    open func setResourcesPath( _ path:String ) { }
 }

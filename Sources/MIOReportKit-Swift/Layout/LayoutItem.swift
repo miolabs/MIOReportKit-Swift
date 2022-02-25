@@ -13,6 +13,7 @@ public protocol AddProtocol {
 }
 
 open class LayoutItem {
+    var parent:LayoutItem?
     var id: String?
     var flex: Int
     var x: Float
@@ -69,6 +70,20 @@ open class LayoutItem {
     
     func notifyAdded ( _ delegate: AddProtocol ) {
         delegate.onItemAdded( self )
+    }
+    
+    func absPosition() -> (x:Float, y:Float) {
+        var abs_x = x
+        var abs_y = y
+        var p = parent
+        
+        while (p != nil) {
+            abs_x += p!.x
+            abs_y += p!.y
+            p = p!.parent
+        }
+        
+        return (x:abs_x, y: abs_y)
     }
 }
 
