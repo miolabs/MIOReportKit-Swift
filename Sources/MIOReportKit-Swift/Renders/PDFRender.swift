@@ -64,20 +64,23 @@ public class PDFRender: RenderContext
             pdf.setFont(defaultFont, size: defaultFontSize)
         }
         else if let table = container as? Table {
-            let header = (table.header as! HStack).children as! [Text]
             
-            let (r, g, b, _) = parse_color("#EAEAFD")
-            for h in header {
-                let abs_pos = pos( h )
-                pdf.setColor(fstype: "fill", colorspace: "rgb", c1: r, c2: g, c3: b)
-                pdf.rect( x: abs_pos.x
-                        , y: abs_pos.y
-                        , width:  Double( h.dimensions.width )
-                        , height: Double( h.dimensions.height ) )
-                pdf.fill()
-                pdf.setColor(fstype: "fill", colorspace: "rgb", c1: 0.0)
+            if !table.hideHeader {
+                let header = (table.header as! HStack).children as! [Text]
                 
-                h.render( self )
+                let (r, g, b, _) = parse_color("#EAEAFD")
+                for h in header {
+                    let abs_pos = pos( h )
+                    pdf.setColor(fstype: "fill", colorspace: "rgb", c1: r, c2: g, c3: b)
+                    pdf.rect( x: abs_pos.x
+                            , y: abs_pos.y
+                            , width:  Double( h.dimensions.width )
+                            , height: Double( h.dimensions.height ) )
+                    pdf.fill()
+                    pdf.setColor(fstype: "fill", colorspace: "rgb", c1: 0.0)
+                    
+                    h.render( self )
+                }
             }
             
 //            /* thick gray line */
@@ -92,6 +95,21 @@ public class PDFRender: RenderContext
 
             for row in table.body.children {
                 for col in (row as! HStack).children {
+                    col.render( self )
+                }
+            }
+            
+            if !table.hideFooter {
+                // horizontal line
+                let footer_pos = pos( table.tableFooter() )
+                pdf.setColor(fstype: "fill", colorspace: "rgb", c1: 0, c2: 0, c3: 0)
+                pdf.rect( x: footer_pos.x
+                        , y: footer_pos.y + 1
+                        , width:  Double( table.dimensions.width  )
+                        , height: Double( 1 ) )
+                pdf.fill()
+                
+                for col in table.tableFooterCols() {
                     col.render( self )
                 }
             }
