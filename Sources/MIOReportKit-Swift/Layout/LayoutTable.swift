@@ -167,7 +167,7 @@ public class Table: FooterHeaderContainer {
         
         for i in cols_key.indices {
             let col = tableHeaderCols()[ i ]
-            col.setCoordinates( local_x, local_y )
+            col.setCoordinates( local_x - x, local_y - y )
             local_x += col.dimensions.width
             local_x += 1
         }
@@ -182,7 +182,7 @@ public class Table: FooterHeaderContainer {
 
             for j in (row as! HStack).children.indices {
                 let col = (row as! HStack).children[ j ]
-                col.setCoordinates( local_x, local_y )
+                col.setCoordinates( local_x - x, local_y - y )
                 local_x += col.dimensions.width
                 local_x += 1 // border
             }
