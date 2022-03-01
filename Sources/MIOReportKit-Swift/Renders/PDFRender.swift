@@ -63,20 +63,23 @@ public class PDFRender: RenderContext
             pdf.setFont( defaultFont, size: defaultFontSize )
         }
         else if let table = container as? Table {
-            let header = (table.header as! HStack).children as! [Text]
             
-            let (r, g, b, _) = parse_color("#EAEAFD")
-            for h in header {
-                let abs_pos = pos( h )
-                pdf.setColor(fstype: "fill", colorspace: "rgb", c1: r, c2: g, c3: b)
-                pdf.rect( x: abs_pos.x
-                        , y: abs_pos.y
-                        , width:  Double( h.dimensions.width )
-                        , height: Double( h.dimensions.height ) )
-                pdf.fill()
-                pdf.setColor(fstype: "fill", colorspace: "rgb", c1: 0.0)
+            if !table.hideHeader {
+                let header = (table.header as! HStack).children as! [Text]
                 
-                h.render( self )
+                let (r, g, b, _) = parse_color("#EAEAFD")
+                for h in header {
+                    let abs_pos = pos( h )
+                    pdf.setColor(fstype: "fill", colorspace: "rgb", c1: r, c2: g, c3: b)
+                    pdf.rect( x: abs_pos.x
+                            , y: abs_pos.y
+                            , width:  Double( h.dimensions.width )
+                            , height: Double( h.dimensions.height ) )
+                    pdf.fill()
+                    pdf.setColor(fstype: "fill", colorspace: "rgb", c1: 0.0)
+                    
+                    h.render( self )
+                }
             }
             
 //            /* thick gray line */
@@ -91,6 +94,21 @@ public class PDFRender: RenderContext
 
             for row in table.body.children {
                 for col in (row as! HStack).children {
+                    col.render( self )
+                }
+            }
+            
+            if !table.hideFooter {
+                // horizontal line
+                let footer_pos = pos( table.tableFooter() )
+                pdf.setColor(fstype: "fill", colorspace: "rgb", c1: 0, c2: 0, c3: 0)
+                pdf.rect( x: footer_pos.x
+                        , y: footer_pos.y + 1
+                        , width:  Double( table.dimensions.width  )
+                        , height: Double( 1 ) )
+                pdf.fill()
+                
+                for col in table.tableFooterCols() {
                     col.render( self )
                 }
             }
@@ -126,6 +144,11 @@ public class PDFRender: RenderContext
         }
     }
     
+    let textAlign = ["left", "center", "right"]
+    func textAlignString( _ align: TextAlign) -> String {
+        return textAlign[ align.rawValue ]
+    }
+    
     override open func renderItem ( _ item: LayoutItem ) {
         if let text = item as? Text {
 //            func pad ( _ length: Int ) -> String {
@@ -154,7 +177,11 @@ public class PDFRender: RenderContext
                 opts.append("fillcolor={rgb \(r) \(g) \(b)}")
 //                opts.append("matchbox={fillcolor={rgb 0.8 0.8 0.87} boxheight={fontsize descender}}")
             }
-            let pos = pos( text )
+            opts.append( "boxsize={\(text.dimensions.width) \(text.dimensions.height)}" )
+            opts.append( "position={" + textAlignString ( text.align ) + " bottom }" )
+            opts.append( "fitmethod=auto" )
+            opts.append( "margin=1" )
+            let pos = self.pos( text )
             // Note => +4 = baseline?
             try? pdf.fitTextLine( text: text.text
                                 , x: pos.x + 4
@@ -169,6 +196,8 @@ public class PDFRender: RenderContext
         }
     }
         
+    
+    
     let fontSize:[Double] = [0, 8, 10, 12, 14, 16, 20, 30]
     func fontSizeInPoints( _ size:ItemSize ) -> Double { return fontSize[ size.rawValue ] }
     var defaultFontSize:Double { get { return fontSizeInPoints (.m ) } }
