@@ -51,9 +51,9 @@ public class Table: FooterHeaderContainer {
     }
     
 
-    public func addColumn ( _ key: String, _ name: String, flex: Int = 0, id: String? = nil, bold: Bool = false, align: TextAlign = .left, wrap: TextWrap = .noWrap ) {
+    public func addColumn ( _ key: String, _ name: String, flex: Int = 0, id: String? = nil, textSize: ItemSize = .m, bold: Bool = false, align: TextAlign = .left, wrap: TextWrap = .noWrap ) {
         cols_key.append( key )
-        tableHeader( ).add( Text( name, flex: flex, id: id, bold: bold, align: align, wrap: wrap ) )
+        tableHeader( ).add( Text( name, flex: flex, id: id, textSize: textSize, bold: bold, align: align, wrap: wrap ) )
     }
 
     public func addRow ( _ dict: [String:Any], bold: Bool = false, italic: Bool = false ) {

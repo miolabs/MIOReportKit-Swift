@@ -15,7 +15,6 @@ public class PDFRender: RenderContext
     
     var defaultFont:Int32 = -1
     var defaultFontBold:Int32 = -1
-    var defaultFontSize: Double = 12
     var margin: Float = 10
     
     var offsetY:Float = 0
@@ -61,7 +60,7 @@ public class PDFRender: RenderContext
         
         if container is A4 {
             pdf.beginPage(options: "width=a4.width height=a4.height")
-            pdf.setFont(defaultFont, size: defaultFontSize)
+            pdf.setFont( defaultFont, size: defaultFontSize )
         }
         else if let table = container as? Table {
             let header = (table.header as! HStack).children as! [Text]
@@ -149,7 +148,7 @@ public class PDFRender: RenderContext
 //            pdf.setGraphicOptions( text.fg_color != nil ? "fillcolor={\(text.fg_color!)}" : "fillcolor=black")
             var opts:[String] = []
             opts.append("font=\( text.bold ? defaultFontBold : defaultFont)" )
-            opts.append("fontsize=\(defaultFontSize)")
+            opts.append("fontsize=\(fontSizeInPoints(text.text_size))")
             if text.fg_color != nil {
                 let (r,g,b,_) = parse_color(text.fg_color!)
                 opts.append("fillcolor={rgb \(r) \(g) \(b)}")
@@ -169,13 +168,18 @@ public class PDFRender: RenderContext
 //            }
         }
     }
+        
+    let fontSize:[Double] = [0, 8, 10, 12, 14, 16, 20, 30]
+    func fontSizeInPoints( _ size:ItemSize ) -> Double { return fontSize[ size.rawValue ] }
+    var defaultFontSize:Double { get { return fontSizeInPoints (.m ) } }
     
     override open func meassure ( _ item: LayoutItem ) -> Size {
         if let text = item as? Text {
-            let w = pdf.stringWidth(text.text, font: defaultFont, size: defaultFontSize)
+            let fs = fontSizeInPoints( text.text_size )
+            let w = pdf.stringWidth(text.text, font: defaultFont, size: fs )
             let descent: Double = 2
             // Text needs air
-            return Size( width: Float( w ), height: Float (defaultFontSize + descent + 4.0) )
+            return Size( width: Float( w ), height: Float (fs + descent + 4.0) )
         }
         else if let sp = item as? Space {
             return Size( width: Float (sp.a.rawValue) * 4, height: Float (sp.b.rawValue) * 4 )
