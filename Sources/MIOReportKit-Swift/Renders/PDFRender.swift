@@ -15,7 +15,7 @@ public class PDFRender: RenderContext
     
     var defaultFont:Int32 = -1
     var defaultFontBold:Int32 = -1
-    var defaultFontSize: Double = 14
+    var defaultFontSize: Double = 12
     var margin: Float = 10
     
     var offsetY:Float = 0
@@ -36,10 +36,10 @@ public class PDFRender: RenderContext
         defaultFont = (try? pdf.loadFont(name: "SF-Compact-Text-Regular", encoding: "winansi", options: "embedding") ) ?? -1
         defaultFontBold = (try? pdf.loadFont(name: "SF-Compact-Text-Bold", encoding: "winansi", options: "embedding") ) ?? -1
         
-        offsetY = PDF.A4.height - 2*margin
+        offsetY = PDF.A4.height - 2 * margin
         
-        root.size = Size( width:  PDF.A4.width  - 2*margin
-                        , height: PDF.A4.height - 2*margin )
+        root.size = Size( width:  PDF.A4.width  - 2 * margin
+                        , height: PDF.A4.height - 2 * margin )
         
         root.dimensions = root.size
     }
@@ -116,7 +116,7 @@ public class PDFRender: RenderContext
     public func pos ( _ item: LayoutItem ) -> (x: Double, y: Double) {
         let abs_pos = item.absPosition( )
         
-        return (x: Double(abs_pos.x + margin), y: Double( offsetY - abs_pos.y - item.dimensions.height + margin ) )
+        return (x: Double(abs_pos.x + margin), y: Double( offsetY - abs_pos.y - item.dimensions.height + margin ) )        
     }
     
     

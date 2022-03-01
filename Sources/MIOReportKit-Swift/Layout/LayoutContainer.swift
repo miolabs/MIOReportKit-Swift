@@ -72,8 +72,11 @@ public class FooterHeaderContainer : VStack {
     var footer: LayoutItem?
     
     init ( header: LayoutItem? = nil, footer: LayoutItem? = nil ) {
-        self.header = header ;
-        self.footer = footer ;
+        super.init()
+        self.header = header
+        self.header?.parent = self
+        self.footer = footer
+        self.footer?.parent = self
     }
 }
 

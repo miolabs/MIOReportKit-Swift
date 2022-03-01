@@ -38,6 +38,7 @@ public class Table: FooterHeaderContainer {
         super.init( header: HStack( ), footer: HStack( ) )
         self.flex = flex
         self.id = id
+        body.parent = self
     }
 
     
