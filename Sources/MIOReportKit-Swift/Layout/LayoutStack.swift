@@ -64,11 +64,18 @@ public class VStack: Container {
     override open func meassure(_ context: RenderContext) {
         super.meassure( context )
 
+        // Space (in vertical) contains the offset in its first coordinate, which
+        // is interpreted by super.measure as witdh, so the size of the VStack does
+        // not have the sum of vertical spaces
+        var v_space: Float = 0
         for c in children {
             if let spc = c as? Space {
                 spc.size = Size( width: size.width, height: spc.size.width )
+                v_space = v_space + spc.size.height
             }
         }
+        
+        size.height += v_space
     }
 
     override func setDimension ( _ dim: Size ) {

@@ -15,7 +15,8 @@ public class PDFRender: RenderContext
     
     var defaultFont:Int32 = -1
     var defaultFontBold:Int32 = -1
-    var defaultFontSize: Double = 10
+    var defaultFontSize: Double = 14
+    var margin: Float = 10
     
     var offsetY:Float = 0
     
@@ -34,6 +35,13 @@ public class PDFRender: RenderContext
         
         defaultFont = (try? pdf.loadFont(name: "SF-Compact-Text-Regular", encoding: "winansi", options: "embedding") ) ?? -1
         defaultFontBold = (try? pdf.loadFont(name: "SF-Compact-Text-Bold", encoding: "winansi", options: "embedding") ) ?? -1
+        
+        offsetY = PDF.A4.height - 2*margin
+        
+        root.size = Size( width:  PDF.A4.width  - 2*margin
+                        , height: PDF.A4.height - 2*margin )
+        
+        root.dimensions = root.size
     }
     
     public override func endRender() {
@@ -54,15 +62,18 @@ public class PDFRender: RenderContext
         if container is A4 {
             pdf.beginPage(options: "width=a4.width height=a4.height")
             pdf.setFont(defaultFont, size: defaultFontSize)
-            offsetY = PDF.A4.height - 20
         }
         else if let table = container as? Table {
             let header = (table.header as! HStack).children as! [Text]
             
             let (r, g, b, _) = parse_color("#EAEAFD")
             for h in header {
+                let abs_pos = pos( h )
                 pdf.setColor(fstype: "fill", colorspace: "rgb", c1: r, c2: g, c3: b)
-                pdf.rect(x: Double (h.absPosition().x), y: Double (offsetY - ( h.absPosition().y) - 3), width: Double( h.dimensions.width ), height: Double ( h.dimensions.height + 2) )
+                pdf.rect( x: abs_pos.x
+                        , y: abs_pos.y
+                        , width:  Double( h.dimensions.width )
+                        , height: Double( h.dimensions.height ) )
                 pdf.fill()
                 pdf.setColor(fstype: "fill", colorspace: "rgb", c1: 0.0)
                 
@@ -88,14 +99,26 @@ public class PDFRender: RenderContext
         else {
             if container.bg_color != nil {
                 let (r,g,b, _) = parse_color(container.bg_color!)
+                let abs_pos = pos( container )
+                
                 pdf.setColor(fstype: "fill", colorspace: "rgb", c1: r, c2: g, c3: b)
-                pdf.rect(x: Double (container.absPosition().x), y: Double (offsetY - ( container.absPosition().y) - 15 ), width: Double( container.dimensions.width ), height: Double ( container.dimensions.height) )
+                pdf.rect( x: abs_pos.x
+                        , y: abs_pos.y
+                        , width:  Double( container.dimensions.width  )
+                        , height: Double( container.dimensions.height ) )
                 pdf.fill()
                 pdf.setColor(fstype: "fill", colorspace: "rgb", c1: 0.0)
             }
         }
 
     }
+    
+    public func pos ( _ item: LayoutItem ) -> (x: Double, y: Double) {
+        let abs_pos = item.absPosition( )
+        
+        return (x: Double(abs_pos.x + margin), y: Double( offsetY - abs_pos.y - item.dimensions.height + margin ) )
+    }
+    
     
     public override func endContainer(_ container: Container) {
         super.endContainer(container)
@@ -105,9 +128,6 @@ public class PDFRender: RenderContext
     }
     
     override open func renderItem ( _ item: LayoutItem ) {
-                
-        
-        
         if let text = item as? Text {
 //            func pad ( _ length: Int ) -> String {
 //                return String( repeating: " ", count: max( 0, length ) )
@@ -135,9 +155,12 @@ public class PDFRender: RenderContext
                 opts.append("fillcolor={rgb \(r) \(g) \(b)}")
 //                opts.append("matchbox={fillcolor={rgb 0.8 0.8 0.87} boxheight={fontsize descender}}")
             }
-            let pos = text.absPosition()            
-            try? pdf.fitTextLine(text: text.text, x: Double(pos.x), y: Double( offsetY - pos.y), options: opts.joined(separator: " "))
-//            y -= 24
+            let pos = pos( text )
+            // Note => +4 = baseline?
+            try? pdf.fitTextLine( text: text.text
+                                , x: pos.x + 4
+                                , y: pos.y + 4 // 2 of air + 2 of descent?
+                                , options: opts.joined(separator: " "))
         }
         else if let img = item as? Image {
 //            let line = String( repeating: "I", count: Int( img.dimensions.width ) )
@@ -150,14 +173,12 @@ public class PDFRender: RenderContext
     override open func meassure ( _ item: LayoutItem ) -> Size {
         if let text = item as? Text {
             let w = pdf.stringWidth(text.text, font: defaultFont, size: defaultFontSize)
-            return Size( width: Float( w ), height: Float (defaultFontSize) )
+            let descent: Double = 2
+            // Text needs air
+            return Size( width: Float( w ), height: Float (defaultFontSize + descent + 4.0) )
         }
         else if let sp = item as? Space {
-//            let w = pdf.stringWidth(" ", font: defaultFont, size: defaultFontSize)
-            return Size( width: Float (sp.a.rawValue) * 2, height: Float (sp.b.rawValue) * 2 )
-        }
-        else if let _ = item as? A4 {
-            return Size( width: Float( PDF.A4.width - 10), height: PDF.A4.height - 20 )
+            return Size( width: Float (sp.a.rawValue) * 4, height: Float (sp.b.rawValue) * 4 )
         }
             
         return super.meassure( item )
