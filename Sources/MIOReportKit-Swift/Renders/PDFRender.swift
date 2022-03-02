@@ -25,7 +25,7 @@ public class PDFRender: RenderContext
         resourcesPath = path
     }
     
-    public override func beginRender(_ root: Container) {
+    public override func beginRender(_ root: Container<LayoutItem> ) {
         super.beginRender(root)
                         
         try? pdf.beginDocument( )
@@ -56,7 +56,7 @@ public class PDFRender: RenderContext
         return renderData
     }
     
-    public override func beginContainer(_ container: Container) {
+    public override func beginContainer(_ container: Container<LayoutItem>) {
         super.beginContainer(container)
         
         if container is A4 {
@@ -66,32 +66,13 @@ public class PDFRender: RenderContext
         else if let table = container as? Table {
             
             if !table.hideHeader {
-                let header = (table.header as! HStack).children as! [Text]
+                let header = table.header!.children
                 
-                let (r, g, b, _) = parse_color("#EAEAFD")
                 for h in header {
-                    let abs_pos = pos( h )
-                    pdf.setColor(fstype: "fill", colorspace: "rgb", c1: r, c2: g, c3: b)
-                    pdf.rect( x: abs_pos.x
-                            , y: abs_pos.y
-                            , width:  Double( h.dimensions.width )
-                            , height: Double( h.dimensions.height ) )
-                    pdf.fill()
-                    pdf.setColor(fstype: "fill", colorspace: "rgb", c1: 0.0)
-                    
+                    rect( h, bg: "#EAEAFD" )
                     h.render( self )
                 }
             }
-            
-//            /* thick gray line */
-//            pdf.setColor(fstype: "stroke", colorspace: "gray", c1: 0.5)
-//            pdf.setLineWidth(width: 1)
-//            let x = table.absPosition().x
-//            let y = offsetY - ( table.absPosition().y + table.header!.dimensions.height ) + 6
-//            pdf.moveTo(x: Double ( x ), y: Double ( y ) )
-//            pdf.lineTo(x: Double ( x + table.dimensions.width ), y: Double ( y ) )
-//            pdf.stroke()
-
 
             for row in table.body.children {
                 for col in (row as! HStack).children {
@@ -101,35 +82,86 @@ public class PDFRender: RenderContext
             
             if !table.hideFooter {
                 // horizontal line
-                let footer_pos = pos( table.tableFooter() )
-                pdf.setColor(fstype: "fill", colorspace: "rgb", c1: 0, c2: 0, c3: 0)
-                pdf.rect( x: footer_pos.x
-                        , y: footer_pos.y + 1
-                        , width:  Double( table.dimensions.width  )
-                        , height: Double( 1 ) )
-                pdf.fill()
+                rect( table.footer!, fg: "#000000", t: 1 )
                 
-                for col in table.tableFooterCols() {
+                for col in table.footer!.children {
                     col.render( self )
                 }
             }
         }
         else {
             if container.bg_color != nil {
-                let (r,g,b, _) = parse_color(container.bg_color!)
-                let abs_pos = pos( container )
                 
-                pdf.setColor(fstype: "fill", colorspace: "rgb", c1: r, c2: g, c3: b)
-                pdf.rect( x: abs_pos.x
-                        , y: abs_pos.y
-                        , width:  Double( container.dimensions.width  )
-                        , height: Double( container.dimensions.height ) )
-                pdf.fill()
-                pdf.setColor(fstype: "fill", colorspace: "rgb", c1: 0.0)
+                rect( container, bg: container.bg_color! )
             }
         }
 
     }
+    
+    
+    public func rect ( _ item: LayoutItem
+                     , fg: String = ""
+                     , t: Double = 0
+                     , l: Double = 0
+                     , b: Double = 0
+                     , r: Double = 0
+                     , bg: String = ""
+                     ) {
+        
+        let p = pos( item )
+        
+        if bg != "" {
+            let bg_color = parse_color( bg )
+
+            pdf.setColor(fstype: "fill", colorspace: "rgb", c1: bg_color.r, c2: bg_color.g, c3: bg_color.b)
+            pdf.rect( x: p.x
+                    , y: p.y
+                    , width:  Double( item.dimensions.width  )
+                    , height: Double( item.dimensions.height ) )
+            pdf.fill()
+        }
+
+        if fg != "" {
+            let fg_color = parse_color( fg )
+            
+            pdf.setColor(fstype: "fill", colorspace: "rgb", c1: fg_color.r, c2: fg_color.g, c3: fg_color.b)
+
+            if t > 0 {
+                pdf.rect( x: p.x
+                        , y: p.y + Double( item.dimensions.height ) - t
+                        , width:  Double( item.dimensions.width  )
+                        , height: Double( t ) )
+                pdf.fill()
+            }
+
+            if l > 0 {
+                pdf.rect( x: p.x
+                        , y: p.y
+                        , width:  Double( l )
+                        , height: Double( item.dimensions.height ) )
+                pdf.fill()
+            }
+            
+            if b > 0 {
+                pdf.rect( x: p.x
+                        , y: p.y
+                        , width:  Double( item.dimensions.width  )
+                        , height: Double( b ) )
+                pdf.fill()
+            }
+
+            if r > 0 {
+                pdf.rect( x: p.x + Double( item.dimensions.width ) - r
+                        , y: p.y
+                        , width:  Double( r )
+                        , height: Double( item.dimensions.height ) )
+                pdf.fill()
+            }
+        }
+        
+        pdf.setColor(fstype: "fill", colorspace: "rgb", c1: 0, c2: 0, c3: 0 )
+    }
+    
     
     public func pos ( _ item: LayoutItem ) -> (x: Double, y: Double) {
         let abs_pos = item.absPosition( )
@@ -138,7 +170,7 @@ public class PDFRender: RenderContext
     }
     
     
-    public override func endContainer(_ container: Container) {
+    public override func endContainer(_ container: Container<LayoutItem>) {
         super.endContainer(container)
         if container is Page {
             pdf.endPage()

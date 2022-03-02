@@ -7,7 +7,7 @@
 
 import Foundation
 
-public class Page: FooterHeaderContainer
+public class Page: FooterHeaderContainer<LayoutItem, LayoutItem>
 {
     public init ( _ size: Size ) {
         super.init()

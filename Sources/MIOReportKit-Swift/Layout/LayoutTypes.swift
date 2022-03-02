@@ -67,7 +67,7 @@ open class RenderContext {
     var x: Float
     var y: Float
     var contraintStack: [Constraint]
-    var containerStack: [Container]
+    var containerStack: [Container<LayoutItem>]
     
     public init ( ) {
         fgColor = "#000000"
@@ -79,18 +79,18 @@ open class RenderContext {
         containerStack = []
     }
     
-    open func beginRender ( _ root: Container ) { containerStack = [root] }
+    open func beginRender ( _ root: Container<LayoutItem> ) { containerStack = [root] }
     open func endRender ( ) { }
     
     open func meassure ( _ item: LayoutItem ) -> Size { return Size( width: 0, height: 0 ) }
     
     open func renderItem ( _ item: LayoutItem ) { }
     
-    open func beginContainer ( _ container: Container ) {
+    open func beginContainer ( _ container: Container<LayoutItem> ) {
         containerStack.append( container )
     }
     
-    open func endContainer ( _ container: Container ) {
+    open func endContainer ( _ container: Container<LayoutItem> ) {
         _ = containerStack.popLast()
     }
     

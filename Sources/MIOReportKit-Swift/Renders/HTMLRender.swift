@@ -68,7 +68,7 @@ public class HTMLRender: RenderContext {
     }
     
     
-    override open func beginContainer ( _ container: Container ) {
+    override open func beginContainer ( _ container: Container<LayoutItem> ) {
         var styles: [String] = itemStyles( container )
         
         if container is A4 {
@@ -185,7 +185,7 @@ public class HTMLRender: RenderContext {
     }
 
     
-    override open func endContainer ( _ container: Container ) {
+    override open func endContainer ( _ container: Container<LayoutItem> ) {
         m_output.append( "</div>" )
         super.endContainer( container )
     }

@@ -38,12 +38,12 @@ public class TextRender: RenderContext {
     }
 
     
-    override open func beginContainer ( _ container: Container ) {
+    override open func beginContainer ( _ container: Container<LayoutItem> ) {
         if let table = container as? Table {
             func draw_border ( ) {
                 x = table.x
                 local_write( "+" )
-                for col in table.tableHeader().children {
+                for col in table.header!.children {
                     local_write( String( repeating: "-", count: Int( col.dimensions.width ) ) )
                     local_write( "+" )
                 }
@@ -58,7 +58,7 @@ public class TextRender: RenderContext {
             local_write( "|" )
             
             for i in table.cols_key.indices {
-                let col = table.tableHeaderCols()[ i ]
+                let col = table.header!.children[ i ]
                 renderItem( col )
                 local_write( "|" )
             }
@@ -114,7 +114,7 @@ public class TextRender: RenderContext {
     }
     
     
-    override open func beginRender ( _ root: Container ) {
+    override open func beginRender ( _ root: Container<LayoutItem> ) {
         reset()
         super.beginRender( root )
     }

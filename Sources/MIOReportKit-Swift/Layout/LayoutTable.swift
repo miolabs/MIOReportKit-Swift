@@ -19,14 +19,12 @@ public struct TableCol {
 
 // INDENTATION
 // indentRow( X, level )
-public class Table: FooterHeaderContainer {
+public class Table: FooterHeaderContainer< HStack<Text>, HStack<Text> > {
     var cols_key: [String]
-    var body: VStack
+    var body: VStack<LayoutItem>
     var max_col: [Float]
     var max_row: [Float]
     public var border: Bool
-    public var hideHeader: Bool
-    public var hideFooter: Bool
 
     public init ( flex: Int = 0, id: String? = nil ) {
         cols_key = []
@@ -34,38 +32,38 @@ public class Table: FooterHeaderContainer {
         max_col  = []
         max_row  = []
         border   = true
-        hideHeader = false
-        hideFooter = true
 
         super.init( header: HStack( ), footer: HStack( ) )
         self.flex = flex
         self.id = id
         body.parent = self
+        hideHeader = false
+        hideFooter = true
     }
 
     
-    public func tableHeaderCols ( ) -> [Text] {
-        return tableHeader().children as! [Text]
-    }
-
-    public func tableHeader ( ) -> HStack {
-        return header as! HStack
-    }
+//    public func tableHeaderCols ( ) -> [Text] {
+//        return tableHeader().children as! [Text]
+//    }
+//
+//    public func tableHeader ( ) -> HStack {
+//        return header as! HStack
+//    }
     
     
-    public func tableFooterCols ( ) -> [Text] {
-        return tableFooter().children as! [Text]
-    }
-
-    public func tableFooter ( ) -> HStack {
-        return footer as! HStack
-    }
+//    public func tableFooterCols ( ) -> [Text] {
+//        return tableFooter().children as! [Text]
+//    }
+//
+//    public func tableFooter ( ) -> HStack {
+//        return footer as! HStack
+//    }
     
 
     public func addColumn ( _ key: String, _ name: String, flex: Int = 0, id: String? = nil, bold: Bool = false, align: TextAlign = .left, wrap: TextWrap = .noWrap ) {
         cols_key.append( key )
-        tableHeader( ).add( Text( name, flex: flex, id: id, bold: bold, align: align, wrap: wrap ) )
-        tableFooter( ).add( Text( "", flex: flex, id: id, bold: bold, align: align, wrap: wrap ) )
+        header!.add( Text( name, flex: flex, id: id, bold: bold, align: align, wrap: wrap ) )
+        footer!.add( Text( "", flex: flex, id: id, bold: bold, align: align, wrap: wrap ) )
     }
 
     public func addRow ( _ dict: [String:Any], bold: Bool = false, italic: Bool = false ) {
@@ -73,7 +71,7 @@ public class Table: FooterHeaderContainer {
         
         for i in cols_key.indices {
             let key = cols_key[ i ]
-            let col = tableHeaderCols()[ i ]
+            let col = header!.children[ i ]
             
             table_row.add( Text( "\(dict[ key ] ?? "")", bold: bold || col.bold, italic: italic, align: col.align, wrap: col.wrap ) )
         }
@@ -87,11 +85,11 @@ public class Table: FooterHeaderContainer {
         for i in cols_key.indices {
             let key = cols_key[ i ]
             
-            (tableFooter().children[ i ] as! Text).text = dict[ key ] as? String ?? ""
+            footer!.children[ i ].text = "\(dict[ key ] as? String ?? "")"
         }
     }
     
-    public func addRow ( _ row: HStack ) {
+    public func addRow ( _ row: HStack<LayoutItem> ) {
         body.add( row )
     }
     
@@ -104,7 +102,7 @@ public class Table: FooterHeaderContainer {
 
         var max_height: Float = 0
 
-        for c in tableHeaderCols( ) {
+        for c in header!.children {
             max_col.append( c.size.width )
 
             if max_height < c.size.height {
@@ -131,9 +129,9 @@ public class Table: FooterHeaderContainer {
         }
                 
 
-        for i in tableHeaderCols().indices {
-            tableHeaderCols()[ i ].size = Size( width: max_col[ i ], height: max_row[ 0 ] )
-            tableFooterCols()[ i ].size = Size( width: max_col[ i ], height: max_row[ 0 ] )
+        for i in header!.children.indices {
+            header!.children[ i ].size = Size( width: max_col[ i ], height: max_row[ 0 ] )
+            footer!.children[ i ].size = Size( width: max_col[ i ], height: max_row[ 0 ] )
         }
 
         let hor_border_size = Float( cols_key.count + 1 )
@@ -150,8 +148,8 @@ public class Table: FooterHeaderContainer {
     
     override func setDimension(_ dim: Size) {
         // var header_dim = Size( )
-        for i in tableHeaderCols().indices {
-            let col = tableHeaderCols()[ i ]
+        for i in header!.children.indices {
+            let col = header!.children[ i ]
             col.size = Size( width: max_col[ i ], height: max_row[ 0 ] )
             
             // tableFooterCols()[ i ].setDimension( Size( width: max_col[ i ], height: footer.size.height ) )
@@ -167,7 +165,7 @@ public class Table: FooterHeaderContainer {
         for row in body.children {
             var sz = Size( )
             for index in cols_key.indices {
-                let col = tableHeaderCols()[ index ]
+                let col = header!.children[ index ]
                 let c = (row as! HStack).children[ index ]
                 c.setDimension( Size( width: col.dimensions.width, height: c.size.height))
                 sz = sz.join( c.dimensions, .horizontal )
@@ -191,7 +189,7 @@ public class Table: FooterHeaderContainer {
         var local_y: Float = y + 1
         
         for i in cols_key.indices {
-            let col = tableHeaderCols()[ i ]
+            let col = header!.children[ i ]
             col.setCoordinates( local_x - x, local_y - y )
             local_x += col.dimensions.width
             local_x += 1
@@ -222,8 +220,8 @@ public class Table: FooterHeaderContainer {
 
         local_x = x + 1
         for i in cols_key.indices {
-            let col = tableFooterCols()[ i ]
-            col.setCoordinates( local_x - x, local_y - footer!.y )
+            let col = footer!.children[ i ]
+            col.setCoordinates( local_x - x, 1 )
             local_x += col.dimensions.width
             local_x += 1
         }

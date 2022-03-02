@@ -8,8 +8,8 @@
 import Foundation
 
 
-public class Container: LayoutItem {
-    var children: [LayoutItem]
+public class Container< E: LayoutItem >: LayoutItem {
+    var children: [E]
     public var delegate: AddProtocol?
     var growDirection: SizeGrowDirection
     
@@ -21,7 +21,7 @@ public class Container: LayoutItem {
         super.init( flex, id )
     }
     
-    public func add ( _ item: LayoutItem ) {
+    public func add ( _ item: E ) {
         children.append( item )
         
         item.parent = self
@@ -61,22 +61,29 @@ public class Container: LayoutItem {
     }
     
     override func render ( _ context: RenderContext ) {
-        context.beginContainer( self )
+        context.beginContainer( self as! Container<LayoutItem>)
           for c in children { c.render( context ) }
-        context.endContainer( self )
+        context.endContainer( self as! Container<LayoutItem> )
     }
 }
 
-public class FooterHeaderContainer : VStack {
-    var header: LayoutItem?
-    var footer: LayoutItem?
-    
-    init ( header: LayoutItem? = nil, footer: LayoutItem? = nil ) {
-        super.init()
+public class FooterHeaderContainer< H:LayoutItem, F: LayoutItem> : VStack<LayoutItem> {
+    var header: H?
+    var footer: F?
+    public var hideHeader: Bool
+    public var hideFooter: Bool
+
+    init ( header: H? = nil, footer: F? = nil ) {
         self.header = header
-        self.header?.parent = self
         self.footer = footer
-        self.footer?.parent = self
+
+        self.hideHeader = false
+        self.hideFooter = false
+
+        super.init()
+
+        self.header?.parent = self
+        self.footer?.parent = self        
     }
 }
 

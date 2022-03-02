@@ -9,9 +9,9 @@ import Foundation
 
 public class Layout: AddProtocol {
     var elementsByID: [String:LayoutItem]
-    var rootItem: Container
+    var rootItem: Container<LayoutItem>
     
-    public init ( _ root: Container ) {
+    public init ( _ root: Container<LayoutItem> ) {
         elementsByID = [:]
         rootItem = root
         root.delegate = self

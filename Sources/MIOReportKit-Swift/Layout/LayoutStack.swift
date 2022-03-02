@@ -7,7 +7,7 @@
 
 import Foundation
 
-public class HStack: Container {
+public class HStack< E: LayoutItem >: Container<E> {
     public override init ( _ flex: Int = 0, _ id: String? = nil ) {
         super.init( flex, id )
         growDirection = .horizontal
@@ -55,7 +55,7 @@ public class HStack: Container {
 }
 
 
-public class VStack: Container {
+public class VStack< E: LayoutItem >: Container<E> {
     public override init ( _ flex: Int = 0, _ id: String? = nil ) {
         super.init( flex, id )
         growDirection = .vertical
