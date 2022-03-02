@@ -97,4 +97,69 @@ open class RenderContext {
     open func output ( ) -> Data { return Data( ) }
     
     open func setResourcesPath( _ path:String ) { }
+    
+    // Convertion types
+    
+    var locale_id:String = "es_ES"
+    open var localeIdentifier:String {
+        set { locale_id = newValue }
+        get { return locale_id }
+    }
+    
+    var currency_formatter:NumberFormatter? = nil
+    var currencyFromatter:NumberFormatter { get {
+        if currency_formatter != nil { return currency_formatter! }
+        
+        currency_formatter = NumberFormatter()
+        currency_formatter!.locale = Locale(identifier: locale_id )
+        currency_formatter!.numberStyle = .decimal
+        currency_formatter!.minimumFractionDigits = 2
+        currency_formatter!.maximumFractionDigits = 2
+       
+        return currency_formatter!
+    } }
+    
+    var number_formatter:NumberFormatter? = nil
+    var numberFormatter:NumberFormatter { get {
+        if number_formatter != nil { return number_formatter! }
+        
+        number_formatter = NumberFormatter()
+        number_formatter!.locale = Locale(identifier: locale_id )
+        number_formatter!.maximumFractionDigits = 4
+       
+        return number_formatter!
+    } }
+
+    
+    open func stringCurrency ( from value: NSDecimalNumber? ) -> String {
+        let number = NSNumber( floatLiteral: value?.doubleValue ?? 0 )
+        return currencyFromatter.string(from: number)!
+    }
+    
+    open func stringNumber ( from value: NSDecimalNumber? ) -> String {
+        let number = NSNumber( floatLiteral: value?.doubleValue ?? 0 )
+        return currencyFromatter.string(from: number)!
+    }
+
+    open func stringNumber ( from value: Int? ) -> String {
+        let number = NSNumber( integerLiteral: value ?? 0 )
+        return numberFormatter.string(from: number)!
+    }
+    
+    var date_formatter:DateFormatter? = nil
+    var dateFormatter:DateFormatter { get {
+        if date_formatter != nil { return date_formatter! }
+        
+        date_formatter = DateFormatter()
+        date_formatter!.locale = Locale(identifier: locale_id )
+        date_formatter!.dateStyle = .short
+        date_formatter!.timeStyle = .short
+       
+        return date_formatter!
+    } }
+    
+    open func stringDate ( from value: Date? ) -> String {
+        return dateFormatter.string(from: value ?? Date())
+    }
+    
 }

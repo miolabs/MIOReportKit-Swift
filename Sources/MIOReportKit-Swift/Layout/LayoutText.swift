@@ -27,7 +27,7 @@ public class Text: LayoutItem {
     public var bold: Bool
     public var text_size: ItemSize
     
-    public init ( _ text: String, flex: Int = 0, id: String? = nil, textSize: ItemSize = .m, bold: Bool = false, italic: Bool = false, align: TextAlign = .left, wrap: TextWrap = .wrap  ) {
+    public init ( _ text: String, flex: Int = 0, id: String? = nil, textSize: ItemSize = .s, bold: Bool = false, italic: Bool = false, align: TextAlign = .left, wrap: TextWrap = .wrap  ) {
         self.text  = text
         self.text_size = textSize
         self.align = align

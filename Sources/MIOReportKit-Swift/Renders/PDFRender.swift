@@ -232,7 +232,7 @@ public class PDFRender: RenderContext
     
     let fontSize:[Double] = [0, 8, 10, 12, 14, 16, 20, 30]
     func fontSizeInPoints( _ size:ItemSize ) -> Double { return fontSize[ size.rawValue ] }
-    var defaultFontSize:Double { get { return fontSizeInPoints (.m ) } }
+    var defaultFontSize:Double { get { return fontSizeInPoints (.s ) } }
     
     override open func meassure ( _ item: LayoutItem ) -> Size {
         if let text = item as? Text {
