@@ -41,27 +41,13 @@ public class Table: FooterHeaderContainer< HStack<Text>, HStack<Text> > {
         hideFooter = true
     }
 
-    
-//    public func tableHeaderCols ( ) -> [Text] {
-//        return tableHeader().children as! [Text]
-//    }
-//
-//    public func tableHeader ( ) -> HStack {
-//        return header as! HStack
-//    }
-    
-    
-//    public func tableFooterCols ( ) -> [Text] {
-//        return tableFooter().children as! [Text]
-//    }
-//
-//    public func tableFooter ( ) -> HStack {
-//        return footer as! HStack
-//    }
-    
 
     public func addColumn ( _ key: String, _ name: String, flex: Int = 0, id: String? = nil, textSize: ItemSize = .m, bold: Bool = false, align: TextAlign = .left, wrap: TextWrap = .noWrap ) {
         cols_key.append( key )
+        
+        // TODO Make a theme!
+        header!.bgColor( "#EAEAFD" )
+        
         header!.add( Text( name, flex: flex, id: id, textSize: textSize, bold: bold, align: align, wrap: wrap ) )
         footer!.add( Text( "", flex: flex, id: id, textSize: textSize, bold: bold, align: align, wrap: wrap ) )
     }
@@ -81,6 +67,9 @@ public class Table: FooterHeaderContainer< HStack<Text>, HStack<Text> > {
     
     public func addFooterRow ( _ dict: [String:Any], bold: Bool = false, italic: Bool = false ) {
         hideFooter = false
+        
+        footer!.style.borderColor.top = "#000000"
+        footer!.style.borderWidth.top = 1
         
         for i in cols_key.indices {
             let key = cols_key[ i ]
@@ -111,6 +100,21 @@ public class Table: FooterHeaderContainer< HStack<Text>, HStack<Text> > {
         }
         max_row.append( max_height )
 
+        for i in header!.children.indices {
+            header!.children[ i ].size = Size( width: max_col[ i ], height: max_row[ 0 ] )
+        }
+
+        
+        max_height = footer!.children.reduce( 0 ) { (max_h,c) in
+            max( max_h, c.size.height )
+        }
+        max_row.append( max_height )
+
+        
+        for i in footer!.children.indices {
+            footer!.children[ i ].size = Size( width: max_col[ i ], height: max_row[ 1 ] )
+        }
+
         for row in body.children {
             max_height = 0
             for i in (row as! HStack).children.indices {
@@ -127,39 +131,30 @@ public class Table: FooterHeaderContainer< HStack<Text>, HStack<Text> > {
 
             max_row.append( max_height )
         }
-                
-
-        for i in header!.children.indices {
-            header!.children[ i ].size = Size( width: max_col[ i ], height: max_row[ 0 ] )
-            footer!.children[ i ].size = Size( width: max_col[ i ], height: max_row[ 0 ] )
-        }
-
+        
         let hor_border_size = Float( cols_key.count + 1 )
-        let ver_border_size = Float( body.children.count + 2 )
+        let ver_border_size = Float( 1
+                                     + (hideHeader ? 0 : 1)
+                                     + body.children.count
+                                     + (hideFooter ? 0 : 1) )
 
         sz = sz.join( header!.size, SizeGrowDirection.both )
         sz = sz.join( body.size   , SizeGrowDirection.both )
         sz = sz.join( footer!.size, SizeGrowDirection.both )
 
+            
         size = Size( width:  hor_border_size + max_col.reduce( 0 ){ sum,col in sum + col }
                    , height: ver_border_size + max_row.reduce( 0 ){ sum,row in sum + row }
                    )
     }
     
     override func setDimension(_ dim: Size) {
-        // var header_dim = Size( )
         for i in header!.children.indices {
             let col = header!.children[ i ]
             col.size = Size( width: max_col[ i ], height: max_row[ 0 ] )
-            
-            // tableFooterCols()[ i ].setDimension( Size( width: max_col[ i ], height: footer.size.height ) )
-            
-            // header_dim = header_dim.join( col.dimensions, .horizontal )
         }
         header!.setDimension( dim )
-        // header!.dimensions = header_dim
-
-        footer!.setDimension(dim)
+        footer!.setDimension( dim )
         
         var body_sz = Size( )
         for row in body.children {
@@ -174,23 +169,31 @@ public class Table: FooterHeaderContainer< HStack<Text>, HStack<Text> > {
             body_sz = body_sz.join( row.dimensions, .vertical )
         }
         
-        body.dimensions = body_sz
+        body.dimensions = body_sz.join( Size( width: 0
+                                            , height: Float(body.children.count + 1) )
+                                      , .vertical ) // border
         
-        dimensions = header!.dimensions
-                        .join( body.dimensions, .vertical )
-                        .join( footer!.dimensions, .vertical )
+        dimensions = body.dimensions
+        
+        if !hideHeader {
+            dimensions = dimensions.join( header!.dimensions, .vertical )
+        }
+            
+        if !hideFooter {
+            dimensions = dimensions.join( footer!.dimensions, .vertical )
+        }
     }
     
     override func setCoordinates(_ x: Float, _ y: Float) {
         self.x = x
         self.y = y
 
-        var local_x: Float = x + 1 // 1 = border size
-        var local_y: Float = y + 1
+        var local_x: Float = 1 // 1 = border size
+        var local_y: Float = 0
         
         for i in cols_key.indices {
             let col = header!.children[ i ]
-            col.setCoordinates( local_x - x, local_y - y )
+            col.setCoordinates( local_x, local_y + 1 )
             local_x += col.dimensions.width
             local_x += 1
         }
@@ -202,26 +205,24 @@ public class Table: FooterHeaderContainer< HStack<Text>, HStack<Text> > {
         for i in body.children.indices {
             let row = body.children[ i ]
             local_y += 1 // border
-            local_x = x
-            local_x += 1 // border
+            local_x  = 1 // border
 
             for j in (row as! HStack).children.indices {
                 let col = (row as! HStack).children[ j ]
-                col.setCoordinates( local_x - x, local_y - y )
-                local_x += col.dimensions.width
-                local_x += 1 // border
+                col.setCoordinates( local_x, local_y )
+                local_x += col.dimensions.width + 1 // border
             }
             
             local_y += row.dimensions.height
         }
 
         footer!.x = 0
-        footer!.y = local_y - y + 1 // border
+        footer!.y = local_y + 1 // border
 
-        local_x = x + 1
+        local_x = 1
         for i in cols_key.indices {
             let col = footer!.children[ i ]
-            col.setCoordinates( local_x - x, 1 )
+            col.setCoordinates( local_x, 1 )
             local_x += col.dimensions.width
             local_x += 1
         }

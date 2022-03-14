@@ -27,6 +27,30 @@ public enum ItemSize: Int {
 }
 
 
+public enum IncludeInPage: Int {
+    case all  = 3
+    case even = 2
+    case odd  = 1
+    case here = 0
+}
+
+
+public func should_include ( _ pageNumber: Int, _ inc: IncludeInPage ) -> Bool {
+    if inc == .here { return false }
+    
+    if inc == .all  { return true  }
+    
+    if (pageNumber & 1) == 0 {
+        if inc == .even {
+            return true
+        }
+    } else if inc == .odd {
+        return true
+    }
+ 
+    return false
+}
+
 
 public struct Size {
     var width : Float = 0
@@ -43,12 +67,72 @@ public struct Size {
     }
 }
 
-public class FontStyle {
+
+public class Edges<T> {
+    var top: T
+    var right: T
+    var bottom: T
+    var left: T
+    
+    init (  _ t: T, _ r: T, _ b: T, _ l: T ) {
+        top = t
+        right = r
+        bottom = b
+        left = l
+    }
+}
+
+
+public class BorderWidth: Edges<Int> {
+    override public init (  _ t: Int = 0, _ r: Int = 0, _ b: Int = 0, _ l: Int = 0 ) {
+        super.init( t, r, b, l )
+    }
+}
+
+
+public class BorderColor: Edges<String?> {
+    override public init ( _ t: String? = nil
+                         , _ r: String? = nil
+                         , _ b: String? = nil
+                         , _ l: String? = nil ) {
+        super.init( t, r, b, l )
+    }
+}
+
+public class Margin: Edges<Float> {
+    override public init (  _ t: Float = 0, _ r: Float = 0, _ b: Float = 0, _ l: Float = 0 ) {
+        super.init( t, r, b, l )
+    }
+}
+
+
+public class Style {
+    var borderWidth: BorderWidth
+    var borderColor: BorderColor
+    var fgColor: String?
+    var bgColor: String?
+    
+    public init ( ) {
+        borderWidth = BorderWidth( )
+        borderColor = BorderColor( )
+    }
+    
+    open func copyValues ( _ ret: Style ) {
+        fgColor = ret.fgColor
+        bgColor = ret.bgColor
+        borderColor = ret.borderColor
+        borderWidth = ret.borderWidth
+    }
+}
+
+
+public class FontStyle: Style {
     var color: String?
     var family: String?
     var size: Int?
     var weight: Int?
 }
+
 
 public class Constraint {
     var width: Decimal?
@@ -79,7 +163,7 @@ open class RenderContext {
         containerStack = []
     }
     
-    open func beginRender ( _ root: Container<LayoutItem> ) { containerStack = [root] }
+    open func beginRender ( _ root: Page ) { containerStack = [root] }
     open func endRender ( ) { }
     
     open func meassure ( _ item: LayoutItem ) -> Size { return Size( width: 0, height: 0 ) }
@@ -161,5 +245,8 @@ open class RenderContext {
     open func stringDate ( from value: Date? ) -> String {
         return dateFormatter.string(from: value ?? Date())
     }
+ 
     
+    open func beginPage ( _ page: LayoutItem ) { }
+    open func endPage   ( _ page: LayoutItem ) { }
 }

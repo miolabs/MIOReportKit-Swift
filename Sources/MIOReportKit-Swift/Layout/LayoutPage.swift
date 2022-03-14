@@ -9,7 +9,12 @@ import Foundation
 
 public class Page: FooterHeaderContainer<LayoutItem, LayoutItem>
 {
-    public init ( _ size: Size ) {
+    public var page_num: Int
+    public var margins: Margin
+    
+    public init ( _ size: Size, _ num: Int = 0 ) {
+        self.page_num = num
+        self.margins = Margin( )
         super.init()
         self.size = size
         self.dimensions = size
@@ -23,6 +28,27 @@ public class Page: FooterHeaderContainer<LayoutItem, LayoutItem>
         super.meassure( context )
         
         size = initial_size
+    }
+    
+    open func setMargins( _ margins: Margin ) {
+        self.margins = margins
+        self.dimensions = Size( width: self.size.width - margins.left - margins.right
+                              , height: self.size.height - margins.top - margins.bottom )
+    }
+    
+    open func newPage ( _ pageNumber: Int ) -> Page {
+        let ret = Page( size )
+        ret.setMargins( margins )
+        
+        if header != nil && should_include( pageNumber, header!.include_in_pages ) {
+            ret.header = self.header
+        }
+
+        if footer != nil && should_include( pageNumber, footer!.include_in_pages ) {
+            ret.footer = self.footer
+        }
+        
+        return ret
     }
 } // even / odd header
 // render => is first child of page

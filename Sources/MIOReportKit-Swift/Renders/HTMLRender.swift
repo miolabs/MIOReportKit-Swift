@@ -79,7 +79,7 @@ public class HTMLRender: RenderContext {
             
             m_output.append( "<div class=\"page\"\(renderStyles( styles ))>" )
         } else if let table = container as? Table {
-            let header = (table.header as! HStack).children as! [Text]
+            let header = table.header!.children
             let COLS = header.map{ "<col style=\"width: \(Int($0.dimensions.width))px;\"/>" }.joined(separator: "\n")
             
             push_output()
@@ -164,8 +164,8 @@ public class HTMLRender: RenderContext {
         var styles: [String] = []
         
         if item.flex > 0 { styles.append( "flex: \(item.flex)" ) }
-        if item.bg_color != nil { styles.append( "background-color: \(item.bg_color!)") }
-        if item.fg_color != nil { styles.append( "color: \(item.fg_color!)") }
+        if item.style.bgColor != nil { styles.append( "background-color: \(item.style.bgColor!)") }
+        if item.style.fgColor != nil { styles.append( "color: \(item.style.fgColor!)") }
 
         return styles
     }
