@@ -18,6 +18,7 @@ public class PDFRender: RenderContext
     var margin: Float = 10
     
     var offsetY:Float = 0
+    var pageOffsetY:Float = 0
     
     var resourcesPath:String?
     public override func setResourcesPath( _ path: String ) {
@@ -32,8 +33,9 @@ public class PDFRender: RenderContext
             pdf.setParameter(key: "SearchPath", value: resourcesPath!)
         }
         
-        defaultFont = (try? pdf.loadFont(name: "SF-Compact-Text-Regular", encoding: "winansi", options: "embedding") ) ?? -1
-        defaultFontBold = (try? pdf.loadFont(name: "SF-Compact-Text-Bold", encoding: "winansi", options: "embedding") ) ?? -1
+//        defaultFont = (try? pdf.loadFont(name: "Arial", encoding: "winansi", options: "embedding") ) ?? -1
+        defaultFont = (try? pdf.loadFont(name: "Arial", encoding: "host" ) ) ?? -1
+        defaultFontBold = (try? pdf.loadFont(name: "Arial Bold", encoding: "host") ) ?? -1
         
         offsetY = PDF.A4.height - 2 * margin
         
@@ -55,6 +57,17 @@ public class PDFRender: RenderContext
         return renderData
     }
     
+    
+    public func checkPageBreak( _ item: LayoutItem ) {
+        let p = pos ( item )
+        if p.y < 0 {
+            pdf.endPage()
+            pdf.beginPage(options: "width=a4.width height=a4.height")
+            pageOffsetY = item.absPosition().y + item.size.height
+        }
+            
+    }
+    
     public override func beginContainer(_ container: Container<LayoutItem>) {
         super.beginContainer(container)
         
@@ -71,9 +84,11 @@ public class PDFRender: RenderContext
                     rect( h, bg: "#EAEAFD" )
                     h.render( self )
                 }
+                rect( table.header!, fg: "#A0A0A0", b: 1 )
             }
 
             for row in table.body.children {
+                checkPageBreak( row )
                 for col in (row as! HStack).children {
                     col.render( self )
                 }
@@ -81,7 +96,7 @@ public class PDFRender: RenderContext
             
             if !table.hideFooter {
                 // horizontal line
-                rect( table.footer!, fg: "#000000", t: 1 )
+                rect( table.footer!, fg: "#A0A0A0", t: 1 )
                 
                 for col in table.footer!.children {
                     col.render( self )
@@ -89,6 +104,7 @@ public class PDFRender: RenderContext
             }
         }
         else {
+            checkPageBreak ( container )
             if container.bg_color != nil {
                 
                 rect( container, bg: container.bg_color! )
@@ -164,8 +180,8 @@ public class PDFRender: RenderContext
     
     public func pos ( _ item: LayoutItem ) -> (x: Double, y: Double) {
         let abs_pos = item.absPosition( )
-        
-        return (x: Double(abs_pos.x + margin), y: Double( offsetY - abs_pos.y - item.dimensions.height + margin ) )        
+         
+        return (x: Double(abs_pos.x + margin), y: Double( offsetY + pageOffsetY - abs_pos.y - item.dimensions.height + margin ) )
     }
     
     
@@ -183,24 +199,6 @@ public class PDFRender: RenderContext
     
     override open func renderItem ( _ item: LayoutItem ) {
         if let text = item as? Text {
-//            func pad ( _ length: Int ) -> String {
-//                return String( repeating: " ", count: max( 0, length ) )
-//            }
-//
-//            let len   = Int( text.dimensions.width )
-//            let space = len - text.text.count
-//            var padded_text: String
-//
-//            switch text.align {
-//                case .left:   padded_text = text.text + pad( space )
-//                case .center: padded_text = pad( space/2 ) + text.text + pad( space - space/2 )
-//                case .right:  padded_text = pad( space ) + text.text
-//            }
-//
-//            x = text.x
-//            y = text.y
-//            local_write( padded_text )
-//            pdf.setGraphicOptions( text.fg_color != nil ? "fillcolor={\(text.fg_color!)}" : "fillcolor=black")
             var opts:[String] = []
             opts.append("font=\( text.bold ? defaultFontBold : defaultFont)" )
             opts.append("fontsize=\(fontSizeInPoints(text.text_size))")
@@ -229,8 +227,7 @@ public class PDFRender: RenderContext
     }
         
     
-    
-    let fontSize:[Double] = [0, 8, 10, 12, 14, 16, 20, 30]
+    let fontSize:[Double] = [0, 2, 4, 6, 8, 10, 14, 18, 30]
     func fontSizeInPoints( _ size:ItemSize ) -> Double { return fontSize[ size.rawValue ] }
     var defaultFontSize:Double { get { return fontSizeInPoints (.s ) } }
     

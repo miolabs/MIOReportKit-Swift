@@ -185,12 +185,12 @@ public class Table: FooterHeaderContainer< HStack<Text>, HStack<Text> > {
         self.x = x
         self.y = y
 
-        var local_x: Float = x + 1 // 1 = border size
-        var local_y: Float = y + 1
+        var local_x: Float = 1 // 1 = border size
+        var local_y: Float = 1
         
         for i in cols_key.indices {
             let col = header!.children[ i ]
-            col.setCoordinates( local_x - x, local_y - y )
+            col.setCoordinates( local_x, local_y )
             local_x += col.dimensions.width
             local_x += 1
         }
@@ -202,12 +202,13 @@ public class Table: FooterHeaderContainer< HStack<Text>, HStack<Text> > {
         for i in body.children.indices {
             let row = body.children[ i ]
             local_y += 1 // border
-            local_x = x
-            local_x += 1 // border
+            local_x = 1
+            row.x = 0
+            row.y = local_y
 
             for j in (row as! HStack).children.indices {
                 let col = (row as! HStack).children[ j ]
-                col.setCoordinates( local_x - x, local_y - y )
+                col.setCoordinates( local_x, 0 )
                 local_x += col.dimensions.width
                 local_x += 1 // border
             }
@@ -216,12 +217,12 @@ public class Table: FooterHeaderContainer< HStack<Text>, HStack<Text> > {
         }
 
         footer!.x = 0
-        footer!.y = local_y - y + 1 // border
+        footer!.y = local_y + 1 // border
 
-        local_x = x + 1
+        local_x = 1
         for i in cols_key.indices {
             let col = footer!.children[ i ]
-            col.setCoordinates( local_x - x, 1 )
+            col.setCoordinates( local_x, 1 )
             local_x += col.dimensions.width
             local_x += 1
         }
