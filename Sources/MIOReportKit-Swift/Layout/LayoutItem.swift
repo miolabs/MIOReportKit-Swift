@@ -12,7 +12,9 @@ public protocol AddProtocol {
     func onItemAdded ( _ idem: LayoutItem )
 }
 
+
 open class LayoutItem {
+    var include_in_pages: IncludeInPage = .here
     var parent:LayoutItem?
     var id: String?
     var flex: Int
@@ -20,9 +22,7 @@ open class LayoutItem {
     var y: Float
     var size: Size
     var dimensions: Size
-    var bg_color: String?
-    var fg_color: String?
-    var border_color: String?
+    var style: Style
     
     public init ( _ flex: Int = 0, _ id: String? = nil ) {
         self.id = id
@@ -31,15 +31,36 @@ open class LayoutItem {
         self.y = 0
         self.dimensions = Size( )
         self.size = Size( )
+        self.style = Style( )
     }
     
+    open func shallowCopy ( ) -> LayoutItem {
+        let ret = LayoutItem( flex, id )
+        ret.copyValues( self )
+        
+        return ret
+    }
+    
+    open func copyValues ( _ ret: LayoutItem ) {
+        flex = ret.flex
+        id = ret.id
+        x = ret.x
+        y = ret.y
+        dimensions = ret.dimensions
+        size = ret.size
+        
+        style.copyValues( ret.style )
+    }
+    
+    @discardableResult
     public func bgColor ( _ bg: String ) -> LayoutItem {
-        bg_color = bg
+        style.bgColor = bg
         return self
     }
         
+    @discardableResult
     public func fgColor ( _ fg: String ) -> LayoutItem {
-        fg_color = fg
+        style.fgColor = fg
         return self
     }
         

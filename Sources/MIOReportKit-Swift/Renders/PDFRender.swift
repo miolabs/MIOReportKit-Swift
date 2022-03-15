@@ -15,7 +15,7 @@ public class PDFRender: RenderContext
     
     var defaultFont:Int32 = -1
     var defaultFontBold:Int32 = -1
-    var margin: Float = 10
+    var pageMargin: Margin = Margin( )
     
     var offsetY:Float = 0
     var pageOffsetY:Float = 0
@@ -25,7 +25,7 @@ public class PDFRender: RenderContext
         resourcesPath = path
     }
     
-    public override func beginRender(_ root: Container<LayoutItem> ) {
+    public override func beginRender(_ root: Page ) {
         super.beginRender(root)
                         
         try? pdf.beginDocument( )
@@ -37,12 +37,13 @@ public class PDFRender: RenderContext
         defaultFont = (try? pdf.loadFont(name: "Arial", encoding: "host" ) ) ?? -1
         defaultFontBold = (try? pdf.loadFont(name: "Arial Bold", encoding: "host") ) ?? -1
         
-        offsetY = PDF.A4.height - 2 * margin
+        pageMargin = root.margins
+        offsetY = PDF.A4.height - root.margins.top - root.margins.bottom
         
-        root.size = Size( width:  PDF.A4.width  - 2 * margin
-                        , height: PDF.A4.height - 2 * margin )
-        
-        root.dimensions = root.size
+//        root.size = Size( width:  PDF.A4.width  - 2 * margin
+//                        , height: PDF.A4.height - 2 * margin )
+//
+//        root.dimensions = root.size
     }
     
     public override func endRender() {
@@ -72,16 +73,16 @@ public class PDFRender: RenderContext
         super.beginContainer(container)
         
         if container is A4 {
-            pdf.beginPage(options: "width=a4.width height=a4.height")
             pdf.setFont( defaultFont, size: defaultFontSize )
         }
         else if let table = container as? Table {
             
             if !table.hideHeader {
                 let header = table.header!.children
-                
+
+                rect( table.header! )
+
                 for h in header {
-                    rect( h, bg: "#EAEAFD" )
                     h.render( self )
                 }
                 rect( table.header!, fg: "#A0A0A0", b: 1 )
@@ -95,8 +96,7 @@ public class PDFRender: RenderContext
             }
             
             if !table.hideFooter {
-                // horizontal line
-                rect( table.footer!, fg: "#A0A0A0", t: 1 )
+                rect( table.footer! )
                 
                 for col in table.footer!.children {
                     col.render( self )
@@ -104,29 +104,24 @@ public class PDFRender: RenderContext
             }
         }
         else {
-            checkPageBreak ( container )
-            if container.bg_color != nil {
-                
-                rect( container, bg: container.bg_color! )
-            }
+            rect( container )
         }
 
     }
     
     
-    public func rect ( _ item: LayoutItem
-                     , fg: String = ""
-                     , t: Double = 0
-                     , l: Double = 0
-                     , b: Double = 0
-                     , r: Double = 0
-                     , bg: String = ""
-                     ) {
+    public func rect ( _ item: LayoutItem ) {
         
         let p = pos( item )
+        let bg = item.style.bgColor
+        let fg = item.style.fgColor
+        let t = item.style.borderWidth.top
+        let b = item.style.borderWidth.bottom
+        let r = item.style.borderWidth.right
+        let l = item.style.borderWidth.left
         
-        if bg != "" {
-            let bg_color = parse_color( bg )
+        if bg != nil {
+            let bg_color = parse_color( bg! )
 
             pdf.setColor(fstype: "fill", colorspace: "rgb", c1: bg_color.r, c2: bg_color.g, c3: bg_color.b)
             pdf.rect( x: p.x
@@ -136,60 +131,66 @@ public class PDFRender: RenderContext
             pdf.fill()
         }
 
-        if fg != "" {
-            let fg_color = parse_color( fg )
-            
-            pdf.setColor(fstype: "fill", colorspace: "rgb", c1: fg_color.r, c2: fg_color.g, c3: fg_color.b)
+        if t > 0 {
+            setColor( item.style.borderColor.top ?? fg )
+            pdf.rect( x: p.x
+                    , y: p.y + Double( item.dimensions.height ) - Double( t )
+                    , width:  Double( item.dimensions.width  )
+                    , height: Double( t ) )
+            pdf.fill()
+        }
 
-            if t > 0 {
-                pdf.rect( x: p.x
-                        , y: p.y + Double( item.dimensions.height ) - t
-                        , width:  Double( item.dimensions.width  )
-                        , height: Double( t ) )
-                pdf.fill()
-            }
-
-            if l > 0 {
-                pdf.rect( x: p.x
-                        , y: p.y
-                        , width:  Double( l )
-                        , height: Double( item.dimensions.height ) )
-                pdf.fill()
-            }
-            
-            if b > 0 {
-                pdf.rect( x: p.x
-                        , y: p.y
-                        , width:  Double( item.dimensions.width  )
-                        , height: Double( b ) )
-                pdf.fill()
-            }
-
-            if r > 0 {
-                pdf.rect( x: p.x + Double( item.dimensions.width ) - r
-                        , y: p.y
-                        , width:  Double( r )
-                        , height: Double( item.dimensions.height ) )
-                pdf.fill()
-            }
+        if l > 0 {
+            setColor( item.style.borderColor.left ?? fg )
+            pdf.rect( x: p.x
+                    , y: p.y
+                    , width:  Double( l )
+                    , height: Double( item.dimensions.height ) )
+            pdf.fill()
         }
         
-        pdf.setColor(fstype: "fill", colorspace: "rgb", c1: 0, c2: 0, c3: 0 )
+        if b > 0 {
+            setColor( item.style.borderColor.bottom ?? fg )
+            pdf.rect( x: p.x
+                    , y: p.y
+                    , width:  Double( item.dimensions.width  )
+                    , height: Double( b ) )
+            pdf.fill()
+        }
+
+        if r > 0 {
+            setColor( item.style.borderColor.right ?? fg )
+            pdf.rect( x: p.x + Double( item.dimensions.width ) - Double( r )
+                    , y: p.y
+                    , width:  Double( r )
+                    , height: Double( item.dimensions.height ) )
+            pdf.fill()
+        }
+        
+        setColor( "#000000" )
+    }
+    
+    func setColor ( _ fg: String?, _ fstype: String = "fill" ) {
+        if fg == nil {
+            return
+        }
+        
+        let fg_color = parse_color( fg! )
+        
+        pdf.setColor(fstype: fstype, colorspace: "rgb", c1: fg_color.r, c2: fg_color.g, c3: fg_color.b)
     }
     
     
     public func pos ( _ item: LayoutItem ) -> (x: Double, y: Double) {
         let abs_pos = item.absPosition( )
-         
-        return (x: Double(abs_pos.x + margin), y: Double( offsetY + pageOffsetY - abs_pos.y - item.dimensions.height + margin ) )
+        
+        return ( x: Double( abs_pos.x + pageMargin.left )
+               , y: Double( offsetY - abs_pos.y - item.dimensions.height + pageMargin.top ) )
     }
     
     
     public override func endContainer(_ container: Container<LayoutItem>) {
         super.endContainer(container)
-        if container is Page {
-            pdf.endPage()
-        }
     }
     
     let textAlign = ["left", "center", "right"]
@@ -198,12 +199,18 @@ public class PDFRender: RenderContext
     }
     
     override open func renderItem ( _ item: LayoutItem ) {
+        rect( item )
+        
+        if clip( item ) {
+            return
+        }
+        
         if let text = item as? Text {
             var opts:[String] = []
             opts.append("font=\( text.bold ? defaultFontBold : defaultFont)" )
             opts.append("fontsize=\(fontSizeInPoints(text.text_size))")
-            if text.fg_color != nil {
-                let (r,g,b,_) = parse_color(text.fg_color!)
+            if text.style.fgColor != nil {
+                let (r,g,b,_) = parse_color(text.style.fgColor!)
                 opts.append("fillcolor={rgb \(r) \(g) \(b)}")
 //                opts.append("matchbox={fillcolor={rgb 0.8 0.8 0.87} boxheight={fontsize descender}}")
             }
@@ -226,6 +233,16 @@ public class PDFRender: RenderContext
         }
     }
         
+    
+    func clip ( _ item: LayoutItem ) -> Bool {
+        if let text = item as? Text {
+            if text.text.starts(with: "ICE TEA-") {
+                print( text.text )
+            }
+        }
+        return item.absPosition().y < 0 // >= offsetY
+    }
+    
     
     let fontSize:[Double] = [0, 2, 4, 6, 8, 10, 14, 18, 30]
     func fontSizeInPoints( _ size:ItemSize ) -> Double { return fontSize[ size.rawValue ] }
@@ -272,4 +289,13 @@ public class PDFRender: RenderContext
         return (0, 0, 0, 0)
     }
     
+    open override func beginPage ( _ page: LayoutItem) {
+        pdf.beginPage(options: "width=a4.width height=a4.height")
+    }
+    
+    
+    open override func endPage ( _ page: LayoutItem) {
+        pdf.endPage()
+    }
+
 }

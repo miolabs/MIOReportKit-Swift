@@ -29,4 +29,11 @@ public class Image: LayoutItem {
         
         // TODO: throw xxx( "the url is not an string: \(value)" )
     }
+    
+    override open func shallowCopy ( ) -> LayoutItem {
+        var ret = Image( url: url, width: imgSize.width, height: imgSize.height )
+        ret.copyValues( self )
+        
+        return ret
+    }
 }

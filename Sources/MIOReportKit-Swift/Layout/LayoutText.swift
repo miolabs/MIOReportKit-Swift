@@ -43,4 +43,21 @@ public class Text: LayoutItem {
             text = new_text
         }
     }
+    
+    override open func shallowCopy ( ) -> LayoutItem {
+        var ret = Text( text )
+        copyTextValues( &ret )
+        
+        return ret
+    }
+    
+    open func copyTextValues ( _ ret: inout Text ) {
+        ret.copyValues( self )
+        ret.text = text
+        ret.align = align
+        ret.wrap = wrap
+        ret.italic = italic
+        ret.bold = bold
+        ret.text_size = text_size
+    }
 }

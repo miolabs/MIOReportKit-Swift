@@ -114,7 +114,7 @@ public class TextRender: RenderContext {
     }
     
     
-    override open func beginRender ( _ root: Container<LayoutItem> ) {
+    override open func beginRender ( _ root: Page ) {
         reset()
         super.beginRender( root )
     }
