@@ -57,18 +57,7 @@ public class PDFRender: RenderContext
     public override func output() -> Data {
         return renderData
     }
-    
-    
-    public func checkPageBreak( _ item: LayoutItem ) {
-        let p = pos ( item )
-        if p.y < 0 {
-            pdf.endPage()
-            pdf.beginPage(options: "width=a4.width height=a4.height")
-            pageOffsetY = item.absPosition().y + item.size.height
-        }
             
-    }
-    
     public override func beginContainer(_ container: Container<LayoutItem>) {
         super.beginContainer(container)
         
@@ -85,11 +74,9 @@ public class PDFRender: RenderContext
                 for h in header {
                     h.render( self )
                 }
-                rect( table.header!, fg: "#A0A0A0", b: 1 )
             }
 
             for row in table.body.children {
-                checkPageBreak( row )
                 for col in (row as! HStack).children {
                     col.render( self )
                 }
