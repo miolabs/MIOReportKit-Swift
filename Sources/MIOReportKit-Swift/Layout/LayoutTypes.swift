@@ -167,7 +167,7 @@ open class RenderContext {
     
     open func translate_container ( _ c: Container<LayoutItem> ) {
         for child in c.children {
-            if let text = child as? Text {
+            if let text = child as? LocalizedText {
                 text.apply_translation( self.translations )
             }
         }

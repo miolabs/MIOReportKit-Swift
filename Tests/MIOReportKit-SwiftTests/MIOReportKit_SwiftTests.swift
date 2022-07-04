@@ -33,8 +33,8 @@
         }
         
         func testTranslateText ( ) throws {
-            let text_tr = Text( "KEY", translate: true )
-            let text_tr2 = Text( "FORGOT", translate: true )
+            let text_tr = LocalizedText( "KEY" )
+            let text_tr2 = LocalizedText( "FORGOT" )
             let render = HTMLRender( [ "KEY": "Helloo" ] )
 
             let page = A4( )
