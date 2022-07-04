@@ -17,7 +17,7 @@
             
             XCTAssertEqual( String( data: render.output( ), encoding: .utf8 ), """
 <div class="page a4">
-<div class="text-left">Hello World</div>
+<div class="text-start text-sz-3">Hello World</div>
 </div>
 """ )
             
@@ -27,7 +27,28 @@
 
             XCTAssertEqual( String( data: render.output( ), encoding: .utf8 ), """
 <div class="page a4">
-<div class="text-left">Bye bye World</div>
+<div class="text-start text-sz-3">Bye bye World</div>
+</div>
+""" )
+        }
+        
+        func testTranslateText ( ) throws {
+            let text_tr = Text( "KEY", translate: true )
+            let text_tr2 = Text( "FORGOT", translate: true )
+            let render = HTMLRender( [ "KEY": "Helloo" ] )
+
+            let page = A4( )
+            let layout = Layout( page )
+            
+            page.add( text_tr )
+            page.add( text_tr2 )
+
+            layout.render( render )
+            
+            XCTAssertEqual( String( data: render.output( ), encoding: .utf8 ), """
+<div class="page a4">
+<div class="text-start text-sz-3">Helloo</div>
+<div class="text-start text-sz-3">__FORGOT__</div>
 </div>
 """ )
         }
@@ -52,8 +73,8 @@
             XCTAssertEqual( String( data: render.output( ), encoding: .utf8 ), """
 <div class="page a4">
 <div class="row">
-<div class="text-left">Hello </div>
-<div class="text-left">World!!!</div>
+<div class="text-start text-sz-3">Hello </div>
+<div class="text-start text-sz-3">World!!!</div>
 </div>
 </div>
 """ )
@@ -76,8 +97,8 @@
             XCTAssertEqual( String( data: render.output( ), encoding: .utf8 ), """
 <div class="page a4">
 <div class="col">
-<div class="text-left">Hello </div>
-<div class="text-left">World</div>
+<div class="text-start text-sz-3">Hello </div>
+<div class="text-start text-sz-3">World</div>
 </div>
 </div>
 """ )
@@ -123,12 +144,12 @@
             
             XCTAssertEqual( String( data: render.output( ), encoding: .utf8 ), """
 <div class="page a4">
-<div class="row">
-<div class="d-flex" style="flex:1"></div>
-<div class="text-left">Hello</div>
-<div class="d-flex" style="flex:2"></div>
-<div class="text-left">World</div>
-<div class="d-flex" style="flex:1"></div>
+<div class="row" style="flex: 1">
+<div class="d-flex" style="flex: 1"></div>
+<div class="text-start text-sz-3">Hello</div>
+<div class="d-flex" style="flex: 2"></div>
+<div class="text-start text-sz-3">World</div>
+<div class="d-flex" style="flex: 1"></div>
 </div>
 </div>
 """ )
@@ -157,47 +178,69 @@
             
             XCTAssertEqual( String( data: render.output( ), encoding: .utf8 ), """
 <div class="page a4">
-<div class="row">
-<div class="d-flex" style="flex:1"></div>
-<div class="table-fixed-header">
+<div class="row" style="flex: 1">
+<div class="d-flex" style="flex: 1"></div>
+<div  class="table-fixed-header border">
   <div class="table-container">
     <div class="table-header">
         <table>
             <colgroup>
-<col style="width: 0.0;">
-<col style="width: 0.0;">
+<col style="width: 1px;"/>
+<col style="width: 2px;"/>
             </colgroup>
             <thead class="table-thead">
                 <tr>
-<th class="table-cell">Population</th>
-<th class="table-cell">Country</th>
+<th class="table-cell">
+<div class="text-start text-nowrap">Population</div>
+</th>
+<th class="table-cell">
+<div class="text-start text-nowrap">Country</div>
+</th>
                 </tr>
             </thead>
         </table>
     </div>
-    <div class="table-body" style="overflow-y: scroll; max-height: 240px;">
+    <div class="table-body">
         <table>
             <colgroup>
-<col style="width: 0.0;">
-<col style="width: 0.0;">
+<col style="width: 1px;"/>
+<col style="width: 2px;"/>
             </colgroup>
             <tbody class="table-tbody">
                 <tr aria-hidden="true" class="table-measure-row" style="height: 0px; font-size: 0px;">
 <td style="padding: 0px; border: 0px; height: 0px;"><div style="height: 0px; overflow: hidden;">&nbsp;</div></td>
 <td style="padding: 0px; border: 0px; height: 0px;"><div style="height: 0px; overflow: hidden;">&nbsp;</div></td>
                 </tr>
-<tr data-row-key="0" class="table-row"><td class="table-cell"><span class="table-row-indent" style="padding-left: 0px;"></span>1234</td>
-<td class="table-cell"><span class="table-row-indent" style="padding-left: 0px;"></span>Spain</td></tr>
-<tr data-row-key="0" class="table-row"><td class="table-cell"><span class="table-row-indent" style="padding-left: 0px;"></span>12</td>
-<td class="table-cell"><span class="table-row-indent" style="padding-left: 0px;"></span>France</td></tr>
-<tr data-row-key="0" class="table-row"><td class="table-cell"><span class="table-row-indent" style="padding-left: 0px;"></span>123456</td>
-<td class="table-cell"><span class="table-row-indent" style="padding-left: 0px;"></span>Germany-Holland</td></tr>
+<tr data-row-key="0" class="table-row">
+<td class="table-cell"><span class="table-row-indent" style="padding-left: 0px;"></span>
+<div class="text-start text-nowrap text-sz-3">1234</div>
+</td>
+<td class="table-cell"><span class="table-row-indent" style="padding-left: 0px;"></span>
+<div class="text-start text-nowrap text-sz-3">Spain</div>
+</td>
+</tr>
+<tr data-row-key="0" class="table-row">
+<td class="table-cell"><span class="table-row-indent" style="padding-left: 0px;"></span>
+<div class="text-start text-nowrap text-sz-3">12</div>
+</td>
+<td class="table-cell"><span class="table-row-indent" style="padding-left: 0px;"></span>
+<div class="text-start text-nowrap text-sz-3">France</div>
+</td>
+</tr>
+<tr data-row-key="0" class="table-row">
+<td class="table-cell"><span class="table-row-indent" style="padding-left: 0px;"></span>
+<div class="text-start text-nowrap text-sz-3">123456</div>
+</td>
+<td class="table-cell"><span class="table-row-indent" style="padding-left: 0px;"></span>
+<div class="text-start text-nowrap text-sz-3">Germany-Holland</div>
+</td>
+</tr>
             </tbody>
         </table>
     </div>
   </div>
 </div>
-<div class="d-flex" style="flex:1"></div>
+<div class="d-flex" style="flex: 1"></div>
 </div>
 </div>
 """ )

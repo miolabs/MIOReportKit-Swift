@@ -152,8 +152,9 @@ open class RenderContext {
     var y: Float
     var contraintStack: [Constraint]
     var containerStack: [Container<LayoutItem>]
+    var translations: [String:String]
     
-    public init ( ) {
+    public init ( _ trans: [String:String] = [:] ) {
         fgColor = "#000000"
         bgColor = "#FFFFFF"
         font = FontStyle( )
@@ -161,7 +162,18 @@ open class RenderContext {
         y = 0
         contraintStack = []
         containerStack = []
+        translations = trans
     }
+    
+    open func translate_container ( _ c: Container<LayoutItem> ) {
+        for child in c.children {
+            if let text = child as? Text {
+                text.apply_translation( self.translations )
+            }
+        }
+        
+    }
+    
     
     open func beginRender ( _ root: Page ) { containerStack = [root] }
     open func endRender ( ) { }

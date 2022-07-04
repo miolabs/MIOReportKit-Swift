@@ -34,6 +34,8 @@ public class Layout: AddProtocol {
         // In case page is the rootItem, its dimensions will change
         let original_page_dimensions = page?.dimensions
         
+        context.translate_container( rootItem )
+        
         context.beginRender( rootItem )
             rootItem.meassure( context )
             // This triggers resizing in children that has flex
@@ -90,10 +92,6 @@ public class Layout: AddProtocol {
         for item in flat_items {
             let start_page = page_for_offset( item.y )
             let end_page   = page_for_offset( item.y + item.dimensions.height )
-
-            if let t = item as? Text {
-                NSLog( "TEXT " + t.text + " \(t.y)" )
-            }
             
             for i in start_page ... end_page {
                 ret[ i ].add( item )

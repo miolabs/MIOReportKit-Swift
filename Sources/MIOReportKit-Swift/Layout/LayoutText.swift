@@ -20,23 +20,34 @@ public enum TextWrap: Int {
 
 
 public class Text: LayoutItem {
+    public var original_text: String
     public var text: String
     public var align: TextAlign
     public var wrap: TextWrap
     public var italic: Bool
     public var bold: Bool
     public var text_size: ItemSize
+    public var translate: Bool
     
-    public init ( _ text: String, flex: Int = 0, id: String? = nil, textSize: ItemSize = .s, bold: Bool = false, italic: Bool = false, align: TextAlign = .left, wrap: TextWrap = .wrap  ) {
-        self.text  = text
+    public init ( _ text: String, flex: Int = 0, id: String? = nil, textSize: ItemSize = .s, bold: Bool = false, italic: Bool = false, align: TextAlign = .left, wrap: TextWrap = .wrap, translate: Bool = false ) {
+        self.original_text = text
+        self.text          = text
         self.text_size = textSize
         self.align = align
         self.wrap  = wrap
         self.italic = italic
         self.bold = bold
+        self.translate = translate
         
         super.init( flex, id )
     }
+
+    func apply_translation ( _ d: [String:String] ) {
+        if self.translate {
+            self.text = d[ self.original_text ] ?? "__\(self.original_text)__"
+        }
+    }
+
     
     override func setValue(_ value: Any) throws {
         if let new_text = value as? String {

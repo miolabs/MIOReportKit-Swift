@@ -46,7 +46,7 @@ public class HTMLRender: RenderContext {
             
             if text.text_size != .m { classes.append( "text-sz-\(text.text_size.rawValue)" ) }
             
-            m_output.append( "<div \(renderClasses(classes))\(renderStyles( styles ))>\(text.text)</div>")
+            m_output.append( "<div\(renderClasses(classes))\(renderStyles( styles ))>\(text.text)</div>")
         } else if let img = item as? Image {
             m_output.append( "<img src=\"\(img.url)\" width=\"\(Int(img.dimensions.width))\" height=\"\(Int(img.dimensions.height))\"/>")
         } else if let spc = item as? Space {
