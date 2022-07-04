@@ -18,6 +18,7 @@ public class PDFRender: RenderContext
     var pageMargin: Margin = Margin( )
     
     var offsetY:Float = 0
+    var pageOffsetY:Float = 0
     
     var resourcesPath:String?
     public override func setResourcesPath( _ path: String ) {
@@ -32,8 +33,9 @@ public class PDFRender: RenderContext
             pdf.setParameter(key: "SearchPath", value: resourcesPath!)
         }
         
-        defaultFont = (try? pdf.loadFont(name: "SF-Compact-Text-Regular", encoding: "winansi", options: "embedding") ) ?? -1
-        defaultFontBold = (try? pdf.loadFont(name: "SF-Compact-Text-Bold", encoding: "winansi", options: "embedding") ) ?? -1
+//        defaultFont = (try? pdf.loadFont(name: "Arial", encoding: "winansi", options: "embedding") ) ?? -1
+        defaultFont = (try? pdf.loadFont(name: "Arial", encoding: "host" ) ) ?? -1
+        defaultFontBold = (try? pdf.loadFont(name: "Arial Bold", encoding: "host") ) ?? -1
         
         pageMargin = root.margins
         offsetY = PDF.A4.height - root.margins.top - root.margins.bottom
@@ -55,7 +57,7 @@ public class PDFRender: RenderContext
     public override func output() -> Data {
         return renderData
     }
-    
+            
     public override func beginContainer(_ container: Container<LayoutItem>) {
         super.beginContainer(container)
         
@@ -191,24 +193,6 @@ public class PDFRender: RenderContext
         }
         
         if let text = item as? Text {
-//            func pad ( _ length: Int ) -> String {
-//                return String( repeating: " ", count: max( 0, length ) )
-//            }
-//
-//            let len   = Int( text.dimensions.width )
-//            let space = len - text.text.count
-//            var padded_text: String
-//
-//            switch text.align {
-//                case .left:   padded_text = text.text + pad( space )
-//                case .center: padded_text = pad( space/2 ) + text.text + pad( space - space/2 )
-//                case .right:  padded_text = pad( space ) + text.text
-//            }
-//
-//            x = text.x
-//            y = text.y
-//            local_write( padded_text )
-//            pdf.setGraphicOptions( text.fg_color != nil ? "fillcolor={\(text.fg_color!)}" : "fillcolor=black")
             var opts:[String] = []
             opts.append("font=\( text.bold ? defaultFontBold : defaultFont)" )
             opts.append("fontsize=\(fontSizeInPoints(text.text_size))")
@@ -247,7 +231,7 @@ public class PDFRender: RenderContext
     }
     
     
-    let fontSize:[Double] = [0, 8, 10, 12, 14, 16, 20, 30]
+    let fontSize:[Double] = [0, 2, 4, 6, 8, 10, 14, 18, 30]
     func fontSizeInPoints( _ size:ItemSize ) -> Double { return fontSize[ size.rawValue ] }
     var defaultFontSize:Double { get { return fontSizeInPoints (.s ) } }
     
