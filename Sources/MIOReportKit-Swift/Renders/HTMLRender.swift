@@ -164,6 +164,7 @@ public class HTMLRender: RenderContext {
         var styles: [String] = []
         
         if item.flex > 0 { styles.append( "flex: \(item.flex)" ) }
+        if item.style.borderRadius > 0 { styles.append( "border-radius: \(item.borderRadius)px" ) }
         if item.style.bgColor != nil { styles.append( "background-color: \(item.style.bgColor!)") }
         if item.style.fgColor != nil { styles.append( "color: \(item.style.fgColor!)") }
 

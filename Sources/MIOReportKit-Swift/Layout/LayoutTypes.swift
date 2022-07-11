@@ -111,6 +111,7 @@ public class Style {
     var borderColor: BorderColor
     var fgColor: String?
     var bgColor: String?
+    var borderRadius: Int = 0
     
     public init ( ) {
         borderWidth = BorderWidth( )
@@ -122,6 +123,7 @@ public class Style {
         bgColor = ret.bgColor
         borderColor = ret.borderColor
         borderWidth = ret.borderWidth
+        borderRadius = ret.borderRadius
     }
 }
 
