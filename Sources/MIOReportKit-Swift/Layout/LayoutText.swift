@@ -36,8 +36,9 @@ public class Text: LayoutItem {
         self.wrap  = wrap
         self.italic = italic
         self.bold = bold
-        
-        super.init( flex, id )
+        super.init()
+        self.flex = 0
+        self.id = id
     }
 
     

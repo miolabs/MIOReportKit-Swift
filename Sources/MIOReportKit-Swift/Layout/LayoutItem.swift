@@ -22,7 +22,7 @@ open class LayoutItem {
     var y: Float
     var size: Size
     var dimensions: Size
-    var style: Style
+    public var style: Style
     
     public init ( _ flex: Int = 0, _ id: String? = nil ) {
         self.id = id

@@ -9,13 +9,46 @@ import Foundation
 
 
 public class Image: LayoutItem {
+    public var data: Data
+    public var imgSize: Size
+    
+    public init ( data: Data, width: Float, height: Float, _ flex: Int = 0, _ id: String? = nil ) {
+        self.data = data
+        self.imgSize = Size( width: width, height: height )
+        super.init( flex, id)
+    }
+    
+    override open func meassure ( _ context: RenderContext ) {
+        size = self.imgSize
+    }
+    
+    override func setValue ( _ value: Any ) throws {
+        if let new_data = value as? Data {
+            data = new_data
+        }
+        
+        // TODO: throw xxx( "the url is not an string: \(value)" )
+    }
+    
+    override open func shallowCopy ( ) -> LayoutItem {
+        let ret = Image( data: data, width: imgSize.width, height: imgSize.height )
+        ret.copyValues( self )
+        
+        return ret
+    }
+}
+
+
+public class URLImage: LayoutItem {
     public var url: String
     public var imgSize: Size
     
     public init ( url: String, width: Float, height: Float, _ flex: Int = 0, _ id: String? = nil ) {
         self.url = url
         self.imgSize = Size( width: width, height: height )
-        super.init( flex, id )
+        super.init( )
+        self.flex = flex
+        self.id = id
     }
     
     override open func meassure ( _ context: RenderContext ) {
@@ -31,7 +64,7 @@ public class Image: LayoutItem {
     }
     
     override open func shallowCopy ( ) -> LayoutItem {
-        var ret = Image( url: url, width: imgSize.width, height: imgSize.height )
+        let ret = URLImage( url: url, width: imgSize.width, height: imgSize.height )
         ret.copyValues( self )
         
         return ret

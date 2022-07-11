@@ -15,6 +15,6 @@ public class Space: LayoutItem {
     public init ( _ a: ItemSize, _ b: ItemSize = .none ) {
         self.a = a
         self.b = b
-        super.init( 0 )
+        super.init( )
     }
 }

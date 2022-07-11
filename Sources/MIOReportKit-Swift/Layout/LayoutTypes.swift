@@ -69,10 +69,10 @@ public struct Size {
 
 
 public class Edges<T> {
-    var top: T
-    var right: T
-    var bottom: T
-    var left: T
+    public var top: T
+    public var right: T
+    public var bottom: T
+    public var left: T
     
     init (  _ t: T, _ r: T, _ b: T, _ l: T ) {
         top = t
@@ -107,10 +107,10 @@ public class Margin: Edges<Float> {
 
 
 public class Style {
-    var borderWidth: BorderWidth
-    var borderColor: BorderColor
-    var fgColor: String?
-    var bgColor: String?
+    public var borderWidth: BorderWidth
+    public var borderColor: BorderColor
+    public var fgColor: String?
+    public var bgColor: String?
     
     public init ( ) {
         borderWidth = BorderWidth( )
