@@ -12,7 +12,7 @@ public class Image: LayoutItem {
     public var data: Data
     public var imgSize: Size
     
-    public init ( data: Data, width: Float, height: Float, _ flex: Int = 0, _ id: String? = nil ) {
+    public init ( data: Data, width: Float, height: Float, flex: Int = 0, id: String? = nil ) {
         self.data = data
         self.imgSize = Size( width: width, height: height )
         super.init( flex, id)
@@ -43,7 +43,7 @@ public class URLImage: LayoutItem {
     public var url: String
     public var imgSize: Size
     
-    public init ( url: String, width: Float, height: Float, _ flex: Int = 0, _ id: String? = nil ) {
+    public init ( url: String, width: Float, height: Float, flex: Int = 0, id: String? = nil ) {
         self.url = url
         self.imgSize = Size( width: width, height: height )
         super.init( )
@@ -53,6 +53,10 @@ public class URLImage: LayoutItem {
     
     override open func meassure ( _ context: RenderContext ) {
         size = self.imgSize
+    }
+    
+    override func setDimension ( _ dim: Size ) {
+        dimensions = dim
     }
     
     override func setValue ( _ value: Any ) throws {

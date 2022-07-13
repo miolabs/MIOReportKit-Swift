@@ -65,6 +65,17 @@ public class Container< E: LayoutItem >: LayoutItem {
           for c in children { c.render( context ) }
         context.endContainer( self as! Container<LayoutItem> )
     }
+    
+    open func translate_container ( _ translations: [String: String] ) {
+        for child in children {
+            if let text = child as? LocalizedText {
+                text.apply_translation( translations )
+            }
+            else if let cont = child as? Container {
+                cont.translate_container( translations )
+            }
+        }
+    }
 }
 
 public class FooterHeaderContainer< H:LayoutItem, F: LayoutItem> : VStack<LayoutItem> {

@@ -7,6 +7,8 @@
 
 import Foundation
 import PDFLib_Swift
+import DualLinkDB
+import MIOCore
 
 public class PDFRender: RenderContext
 {
@@ -34,8 +36,8 @@ public class PDFRender: RenderContext
         }
         
 //        defaultFont = (try? pdf.loadFont(name: "Arial", encoding: "winansi", options: "embedding") ) ?? -1
-        defaultFont = (try? pdf.loadFont(name: "Arial", encoding: "host" ) ) ?? -1
-        defaultFontBold = (try? pdf.loadFont(name: "Arial Bold", encoding: "host") ) ?? -1
+        defaultFont = (try? pdf.loadFont(name: "Helvetica", encoding: "winansi" ) ) ?? -1
+        defaultFontBold = (try? pdf.loadFont(name: "Helvetica-Bold", encoding: "winansi") ) ?? -1
         
         pageMargin = root.margins
         offsetY = PDF.A4.height - root.margins.top - root.margins.bottom
@@ -63,6 +65,7 @@ public class PDFRender: RenderContext
         
         if container is A4 {
             pdf.setFont( defaultFont, size: defaultFontSize )
+            pdf.setParameter(key: "stringformat", value: "utf8")
         }
         else if let table = container as? Table {
             
@@ -98,6 +101,9 @@ public class PDFRender: RenderContext
     
     
     public func rect ( _ item: LayoutItem ) {
+        defer {
+            setColor( "#000000" )
+        }
         
         let p = pos( item )
         let bg = item.style.bgColor
@@ -117,7 +123,24 @@ public class PDFRender: RenderContext
                     , height: Double( item.dimensions.height ) )
             pdf.fill()
         }
-
+                
+        //TODO: Hack to render rounded rectangle only with all the border > 0
+        if t > 0 && l > 0 && b > 0 && r > 0 {
+            let rdx = Double( item.style.borderRadius )
+            pdf.moveTo( x: p.x + rdx, y: p.y)
+            pdf.lineTo( x: p.x + Double( item.dimensions.width ) - rdx, y: p.y )
+            pdf.arc   ( x: p.x + Double( item.dimensions.width ) - rdx, y: p.y + rdx, radius: rdx, alpha: 270, beta: 360 )
+            pdf.lineTo( x: p.x + Double( item.dimensions.width ), y: p.y - rdx + Double( item.dimensions.height ) )
+            pdf.arc   ( x: p.x + Double( item.dimensions.width ) - rdx , y: p.y - rdx + Double( item.dimensions.height ), radius: rdx, alpha: 0, beta: 90 )
+            pdf.lineTo( x: p.x + rdx, y: p.y + Double( item.dimensions.height ) )
+            pdf.arc   ( x: p.x + rdx, y: p.y - rdx + Double( item.dimensions.height ), radius: rdx, alpha: 90, beta: 180 )
+            pdf.lineTo( x: p.x, y: p.y + rdx )
+            pdf.arc   ( x: p.x + rdx, y: p.y + rdx, radius: rdx, alpha: 180, beta: 270 )
+            
+            pdf.stroke()
+            return
+        }
+        
         if t > 0 {
             setColor( item.style.borderColor.top ?? fg )
             pdf.rect( x: p.x
@@ -154,7 +177,6 @@ public class PDFRender: RenderContext
             pdf.fill()
         }
         
-        setColor( "#000000" )
     }
     
     func setColor ( _ fg: String?, _ fstype: String = "fill" ) {
@@ -212,11 +234,16 @@ public class PDFRender: RenderContext
                                 , y: pos.y + 4 // 2 of air + 2 of descent?
                                 , options: opts.joined(separator: " "))
         }
-        else if let img = item as? Image {
-//            let line = String( repeating: "I", count: Int( img.dimensions.width ) )
-//            for y in 0..<Int(img.dimensions.height) {
-//                write( Int( img.x ), Int( img.y ) + y, line )
-//            }
+        else if let img = item as? URLImage {
+            let r = URLRequest( urlString: img.url )
+            let data = try? MIOCoreURLDataRequest_sync( r )
+            if data != nil {
+                pdf.createPVF(filename: img.url, data: data!)
+                if let image = try? pdf.loadImage(fileName: img.url) {
+                    let pos = self.pos( img )
+                    pdf.fitImage(image: image, x: pos.x, y: pos.y, options: "boxsize={\(item.dimensions.width) \(item.dimensions.height)} fitmethod=auto") //pos.x, y: pos.y, options: "boxsize={\(item.dimensions.width) \(item.dimensions.height)}" )
+                }
+            }
         }
     }
         

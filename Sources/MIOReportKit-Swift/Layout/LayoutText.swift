@@ -27,8 +27,9 @@ public class Text: LayoutItem {
     public var italic: Bool
     public var bold: Bool
     public var text_size: ItemSize
+    public var formmaterType: FormatterType
     
-    public init ( _ text: String, flex: Int = 0, id: String? = nil, textSize: ItemSize = .s, bold: Bool = false, italic: Bool = false, align: TextAlign = .left, wrap: TextWrap = .wrap ) {
+    public init ( _ text: String, flex: Int = 0, id: String? = nil, textSize: ItemSize = .s, bold: Bool = false, italic: Bool = false, align: TextAlign = .left, wrap: TextWrap = .wrap, formatterType: FormatterType = .string ) {
         self.original_text = text
         self.text          = text
         self.text_size = textSize
@@ -36,6 +37,7 @@ public class Text: LayoutItem {
         self.wrap  = wrap
         self.italic = italic
         self.bold = bold
+        self.formmaterType = formatterType
         super.init()
         self.flex = 0
         self.id = id
@@ -63,7 +65,9 @@ public class Text: LayoutItem {
         ret.italic = italic
         ret.bold = bold
         ret.text_size = text_size
+        ret.formmaterType = formmaterType
     }
+    
 }
 
 

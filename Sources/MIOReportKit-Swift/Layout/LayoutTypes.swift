@@ -111,6 +111,7 @@ public class Style {
     public var borderColor: BorderColor
     public var fgColor: String?
     public var bgColor: String?
+    public var borderRadius: Int = 0
     
     public init ( ) {
         borderWidth = BorderWidth( )
@@ -122,6 +123,7 @@ public class Style {
         bgColor = ret.bgColor
         borderColor = ret.borderColor
         borderWidth = ret.borderWidth
+        borderRadius = ret.borderRadius
     }
 }
 
@@ -142,6 +144,20 @@ public class Constraint {
         self.width  = width
         self.height = height
     }
+}
+
+
+public enum FormatterType {
+    case string
+    case number
+    case decimal
+    case currency
+    case percentage
+    case shortDate
+    case shortDateTime
+    case longDate
+    case longDateTime
+    case time
 }
 
 open class RenderContext {
@@ -169,6 +185,9 @@ open class RenderContext {
         for child in c.children {
             if let text = child as? LocalizedText {
                 text.apply_translation( self.translations )
+            }
+            else if let cont = child as? Container {
+                cont.translate_container( self.translations )
             }
         }
         
