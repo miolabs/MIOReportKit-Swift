@@ -7,7 +7,6 @@
 
 import Foundation
 import PDFLib_Swift
-import DualLinkDB
 import MIOCore
 
 public class PDFRender: RenderContext
