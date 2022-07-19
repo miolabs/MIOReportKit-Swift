@@ -202,10 +202,14 @@ public class PDFRender: RenderContext
         super.endContainer(container)
     }
     
-    let textAlign = ["left", "center", "right"]
-    func textAlignString( _ align: TextAlign) -> String {
-        return textAlign[ align.rawValue ]
+    let _align:[String] = ["left", "center", "right"]
+    func textAlignString( _ align: TextAlign ) -> String {
+        return _align[ align.rawValue ]
     }
+    func imageAlignString( _ align: ImageAlign ) -> String {
+        return _align[ align.rawValue ]
+    }
+
     
     override open func renderItem ( _ item: LayoutItem ) {
         rect( item )
@@ -241,7 +245,9 @@ public class PDFRender: RenderContext
                 pdf.createPVF(filename: img.url, data: data!)
                 if let image = try? pdf.loadImage(fileName: img.url) {
                     let pos = self.pos( img )
-                    pdf.fitImage(image: image, x: pos.x, y: pos.y, options: "boxsize={\(item.dimensions.width) \(item.dimensions.height)} fitmethod=auto") //pos.x, y: pos.y, options: "boxsize={\(item.dimensions.width) \(item.dimensions.height)}" )
+                    pdf.fitImage(image: image, x: pos.x, y: pos.y, options: "boxsize={\(item.dimensions.width) \(item.dimensions.height)} fitmethod=auto position={ \(imageAlignString ( img.align ) ) center }")
+//                    pdf.fitImage(image: image, x: pos.x, y: pos.y, options: "boxsize={\(item.dimensions.width) \(item.dimensions.height)} fitmethod=auto")
+                    pdf.closeImage( image: image )
                 }
             }
         }

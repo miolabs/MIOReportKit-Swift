@@ -241,7 +241,7 @@ open class RenderContext {
         number_formatter = NumberFormatter()
         number_formatter!.locale = Locale(identifier: locale_id )
         number_formatter!.minimumFractionDigits = 0
-        number_formatter!.maximumFractionDigits = 4
+        number_formatter!.maximumFractionDigits = 2
        
         return number_formatter!
     } }
