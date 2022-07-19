@@ -102,7 +102,7 @@ public class PDFRender: RenderContext
     
     public func rect ( _ item: LayoutItem ) {
         defer {
-            setColor( "#000000" )
+            setColor( "#000000", "fillstroke")
         }
         
         let p = pos( item )
@@ -114,9 +114,7 @@ public class PDFRender: RenderContext
         let l = item.style.borderWidth.left
         
         if bg != nil {
-            let bg_color = parse_color( bg! )
-
-            pdf.setColor(fstype: "fill", colorspace: "rgb", c1: bg_color.r, c2: bg_color.g, c3: bg_color.b)
+            setColor( bg )
             pdf.rect( x: p.x
                     , y: p.y
                     , width:  Double( item.dimensions.width  )
@@ -125,7 +123,8 @@ public class PDFRender: RenderContext
         }
                 
         //TODO: Hack to render rounded rectangle only with all the border > 0
-        if t > 0 && l > 0 && b > 0 && r > 0 {
+        if t > 0 && l > 0 && b > 0 && r > 0 && item.style.borderRadius > 0 {
+            setColor( fg, "stroke" )
             let rdx = Double( item.style.borderRadius )
             pdf.moveTo( x: p.x + rdx, y: p.y)
             pdf.lineTo( x: p.x + Double( item.dimensions.width ) - rdx, y: p.y )
@@ -179,14 +178,11 @@ public class PDFRender: RenderContext
         
     }
     
-    func setColor ( _ fg: String?, _ fstype: String = "fill" ) {
-        if fg == nil {
-            return
-        }
+    func setColor ( _ color: String?, _ fstype: String = "fill" ) {
+        if color == nil { return }
         
-        let fg_color = parse_color( fg! )
-        
-        pdf.setColor(fstype: fstype, colorspace: "rgb", c1: fg_color.r, c2: fg_color.g, c3: fg_color.b)
+        let color = parse_color( color! )
+        pdf.setColor(fstype: fstype, colorspace: "rgb", c1: color.r, c2: color.g, c3: color.b)
     }
     
     
@@ -226,12 +222,12 @@ public class PDFRender: RenderContext
             opts.append( "boxsize={\(text.dimensions.width) \(text.dimensions.height)}" )
             opts.append( "position={" + textAlignString ( text.align ) + " bottom }" )
             opts.append( "fitmethod=auto" )
-            opts.append( "margin=1" )
+            //opts.append( "margin=2" )
             let pos = self.pos( text )
             // Note => +4 = baseline?
             try? pdf.fitTextLine( text: text.text
-                                , x: pos.x + 4
-                                , y: pos.y + 4 // 2 of air + 2 of descent?
+                                , x: pos.x
+                                , y: pos.y + 4
                                 , options: opts.joined(separator: " "))
         }
         else if let img = item as? URLImage {
@@ -265,7 +261,7 @@ public class PDFRender: RenderContext
     override open func meassure ( _ item: LayoutItem ) -> Size {
         if let text = item as? Text {
             let fs = fontSizeInPoints( text.text_size )
-            let w = pdf.stringWidth(text.text, font: defaultFont, size: fs )
+            let w = pdf.stringWidth("\(text.text)", font: text.bold ? defaultFontBold : defaultFont, size: fs )
             let descent: Double = 2
             // Text needs air
             return Size( width: Float( w ), height: Float (fs + descent + 4.0) )

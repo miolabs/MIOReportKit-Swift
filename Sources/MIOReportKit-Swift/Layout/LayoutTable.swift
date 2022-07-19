@@ -26,7 +26,7 @@ public class Table: FooterHeaderContainer< HStack<Text>, HStack<Text> > {
     var max_row: [Float]
     public var border: Bool
 
-    public init ( flex: Int = 0, id: String? = nil ) {
+    public init ( _ flex: Int = 0, _ id: String? = nil ) {
         cols_key = []
         body     = VStack( )
         max_col  = []
@@ -42,13 +42,17 @@ public class Table: FooterHeaderContainer< HStack<Text>, HStack<Text> > {
     }
 
 
-    public func addColumn ( _ key: String, _ name: String, flex: Int = 0, id: String? = nil, textSize: ItemSize = .m, bold: Bool = false, align: TextAlign = .left, wrap: TextWrap = .noWrap ) {
+    public func addColumn ( _ key: String, _ name: String, flex: Int = 0, id: String? = nil, textSize: ItemSize = .m, bold: Bool = false, align: TextAlign = .left, wrap: TextWrap = .noWrap, fgColor:String? = nil, bgColor:String? = nil) {
         cols_key.append( key )
         
-        // TODO Make a theme!
-        header!.bgColor( "#EAEAFD" )
+//        // TODO Make a theme!
+//        header!.bgColor( "#EAEAFD" )
         
-        header!.add( Text( name, flex: flex, id: id, textSize: textSize, bold: bold, align: align, wrap: wrap ) )
+        let header_text = LocalizedText( name, flex: flex, id: id, textSize: textSize, bold: bold, align: align, wrap: wrap )
+        if fgColor != nil {
+            _ = header_text.foregroundColor( fgColor! )
+        }
+        header!.add( header_text )
         footer!.add( Text( "", flex: flex, id: id, textSize: textSize, bold: bold, align: align, wrap: wrap ) )
     }
 
@@ -59,7 +63,7 @@ public class Table: FooterHeaderContainer< HStack<Text>, HStack<Text> > {
             let key = cols_key[ i ]
             let col = header!.children[ i ]
             
-            table_row.add( Text( "\(dict[ key ] ?? "")", bold: bold || col.bold, italic: italic, align: col.align, wrap: col.wrap ) )
+            table_row.add( Text( "\(dict[ key ] ?? "")", bold: bold, italic: italic, align: col.align, wrap: col.wrap ) )
         }
         
         body.add( table_row )
@@ -194,6 +198,7 @@ public class Table: FooterHeaderContainer< HStack<Text>, HStack<Text> > {
         for i in cols_key.indices {
             let col = header!.children[ i ]
             col.setCoordinates( local_x, local_y + 1 )
+            col.dimensions.width += (i == 0 || i == cols_key.count - 1) ? -2 : -1
             local_x += col.dimensions.width
             local_x += 1
         }
@@ -210,6 +215,7 @@ public class Table: FooterHeaderContainer< HStack<Text>, HStack<Text> > {
             for j in (row as! HStack).children.indices {
                 let col = (row as! HStack).children[ j ]
                 col.setCoordinates( local_x, local_y )
+                col.dimensions.width += (j == 0 || j == cols_key.count - 1) ? -2 : -1
                 local_x += col.dimensions.width + 1 // border
             }
             
@@ -223,8 +229,21 @@ public class Table: FooterHeaderContainer< HStack<Text>, HStack<Text> > {
         for i in cols_key.indices {
             let col = footer!.children[ i ]
             col.setCoordinates( local_x, 1 )
+            col.dimensions.width += (i == 0 || i == cols_key.count - 1) ? -2 : -1
             local_x += col.dimensions.width
             local_x += 1
         }
     }
+    
+    open override func translate_container ( _ translations: [String: String] ) {
+        for child in header!.children as [LayoutItem]{
+            if let text = child as? LocalizedText {
+                text.apply_translation( translations )
+            }
+            else if let cont = child as? Container {
+                cont.translate_container( translations )
+            }
+        }
+    }
+
 }

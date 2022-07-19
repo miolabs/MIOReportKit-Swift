@@ -240,6 +240,7 @@ open class RenderContext {
         
         number_formatter = NumberFormatter()
         number_formatter!.locale = Locale(identifier: locale_id )
+        number_formatter!.minimumFractionDigits = 0
         number_formatter!.maximumFractionDigits = 4
        
         return number_formatter!
@@ -248,12 +249,25 @@ open class RenderContext {
     
     open func stringCurrency ( from value: NSDecimalNumber? ) -> String {
         let number = NSNumber( floatLiteral: value?.doubleValue ?? 0 )
+//        let str = currencyFromatter.string(from: number)! + " " + currencyFromatter.currencySymbol!
         return currencyFromatter.string(from: number)!
     }
     
+    open func stringCurrency ( from value: Decimal? ) -> String {
+        let d = NSDecimalNumber(decimal: value ?? 0)
+        return stringCurrency(from: d )
+    }
+    
     open func stringNumber ( from value: NSDecimalNumber? ) -> String {
-        let number = NSNumber( floatLiteral: value?.doubleValue ?? 0 )
-        return currencyFromatter.string(from: number)!
+        let d = value?.doubleValue ?? 0
+        let number = NSNumber( floatLiteral: d )
+        numberFormatter.minimumFractionDigits = floor( d ) == d ? 0 : 2
+        return numberFormatter.string(from: number)!
+    }
+    
+    open func stringNumber ( from value: Decimal? ) -> String {
+        let d = NSDecimalNumber(decimal: value ?? 0)
+        return stringNumber( from: d )
     }
 
     open func stringNumber ( from value: Int? ) -> String {
@@ -273,7 +287,9 @@ open class RenderContext {
         return date_formatter!
     } }
     
-    open func stringDate ( from value: Date? ) -> String {
+    open func stringDate ( from value: Date?, dateStyle: DateFormatter.Style = .short, timeStyle: DateFormatter.Style = .short) -> String {
+        dateFormatter.dateStyle = dateStyle
+        dateFormatter.timeStyle = timeStyle
         return dateFormatter.string(from: value ?? Date())
     }
  

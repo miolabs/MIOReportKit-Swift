@@ -10,7 +10,7 @@ import Foundation
 
 public class Padding: VStack<LayoutItem> {
     public init ( _ item: LayoutItem
-                , _ top: ItemSize, _ right: ItemSize, _ bottom: ItemSize, _ left: ItemSize
+                , top: ItemSize = .none, right: ItemSize = .none, bottom: ItemSize = .none, left: ItemSize = .none
                 , flex: Int = 0, id: String? = nil
                 ) {
         super.init( flex, id )

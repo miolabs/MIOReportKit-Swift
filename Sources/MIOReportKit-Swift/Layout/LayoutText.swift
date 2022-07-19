@@ -39,7 +39,7 @@ public class Text: LayoutItem {
         self.bold = bold
         self.formmaterType = formatterType
         super.init()
-        self.flex = 0
+        self.flex = flex
         self.id = id
     }
 
@@ -74,6 +74,6 @@ public class Text: LayoutItem {
 
 public class LocalizedText: Text {
     func apply_translation ( _ d: [String:String] ) {
-       self.text = d[ self.original_text ] ?? "__\(self.original_text)__"
+       self.text = d[ self.original_text ] ?? self.original_text
     }
 }
