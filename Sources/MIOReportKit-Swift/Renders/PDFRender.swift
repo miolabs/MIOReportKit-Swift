@@ -9,6 +9,11 @@ import Foundation
 import PDFLib_Swift
 import MIOCore
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+
+
 public class PDFRender: RenderContext
 {
     var pdf = PDF()
