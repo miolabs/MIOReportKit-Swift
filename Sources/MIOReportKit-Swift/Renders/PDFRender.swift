@@ -255,7 +255,7 @@ public class PDFRender: RenderContext
                     pdf.closeImage( image: image )
                 }
                 catch {
-                    print( "*** URL Image error: \(error)")
+                    print( "*** URL Image error: \(error.localizedDescription)")
                 }
                 pdf.deletePVF( filename: fn )
             }
