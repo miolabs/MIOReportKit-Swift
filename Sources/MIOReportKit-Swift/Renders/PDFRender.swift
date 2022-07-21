@@ -247,7 +247,7 @@ public class PDFRender: RenderContext
                 pdf.createPVF( filename: fn, data: data! )
                 print("*** URL Image create pvf PDFLIB: \(fn)")
                 do {
-                    let image = try pdf.loadImage(fileName: img.url)
+                    let image = try pdf.loadImage(fileName: fn )
                     print("*** URL Image load image PDFLIB")
                     let pos = self.pos( img )
                     pdf.fitImage(image: image, x: pos.x, y: pos.y, options: "boxsize={\(item.dimensions.width) \(item.dimensions.height)} fitmethod=auto position={ \(imageAlignString ( img.align ) ) center }")
