@@ -241,14 +241,18 @@ public class PDFRender: RenderContext
         else if let img = item as? URLImage {
             let r = URLRequest( urlString: img.url )
             let data = try? MIOCoreURLDataRequest_sync( r )
+            print("*** URL Image retrieve data from url")
             if data != nil {
-                pdf.createPVF(filename: img.url, data: data!)
+                pdf.createPVF( filename: img.url, data: data! )
+                print("*** URL Image create pvf PDFLIB")
                 if let image = try? pdf.loadImage(fileName: img.url) {
+                    print("*** URL Image load image PDFLIB")
                     let pos = self.pos( img )
                     pdf.fitImage(image: image, x: pos.x, y: pos.y, options: "boxsize={\(item.dimensions.width) \(item.dimensions.height)} fitmethod=auto position={ \(imageAlignString ( img.align ) ) center }")
 //                    pdf.fitImage(image: image, x: pos.x, y: pos.y, options: "boxsize={\(item.dimensions.width) \(item.dimensions.height)} fitmethod=auto")
                     pdf.closeImage( image: image )
                 }
+                pdf.deletePVF( filename: img.url )
             }
         }
     }
@@ -271,10 +275,16 @@ public class PDFRender: RenderContext
     override open func meassure ( _ item: LayoutItem ) -> Size {
         if let text = item as? Text {
             let fs = fontSizeInPoints( text.text_size )
-            let w = pdf.stringWidth("\(text.text)", font: text.bold ? defaultFontBold : defaultFont, size: fs )
             let descent: Double = 2
+            var offset_y: Float = 0
+            
+            let w = pdf.stringWidth("\(text.text)", font: text.bold ? defaultFontBold : defaultFont, size: fs )
+            if Float ( w ) > PDF.A4.width && text.wrap == .wrap {
+                offset_y = ( Float(w) / PDF.A4.width ) + 1
+            }
+            
             // Text needs air
-            return Size( width: Float( w ), height: Float (fs + descent + 4.0) )
+            return Size( width: Float( w ), height: Float (fs + descent + 4.0) + offset_y )
         }
         else if let sp = item as? Space {
             return Size( width: Float (sp.a.rawValue) * 4, height: Float (sp.b.rawValue) * 4 )

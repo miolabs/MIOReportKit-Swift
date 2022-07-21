@@ -180,20 +180,7 @@ open class RenderContext {
         containerStack = []
         translations = trans
     }
-    
-    open func translate_container ( _ c: Container<LayoutItem> ) {
-        for child in c.children {
-            if let text = child as? LocalizedText {
-                text.apply_translation( self.translations )
-            }
-            else if let cont = child as? Container {
-                cont.translate_container( self.translations )
-            }
-        }
-        
-    }
-    
-    
+            
     open func beginRender ( _ root: Page ) { containerStack = [root] }
     open func endRender ( ) { }
     
@@ -212,8 +199,29 @@ open class RenderContext {
     open func output ( ) -> Data { return Data( ) }
     
     open func setResourcesPath( _ path:String ) { }
+        
+    open func beginPage ( _ page: LayoutItem ) { }
+    open func endPage   ( _ page: LayoutItem ) { }
     
-    // Convertion types
+    // MARK: - Translations
+    
+    open func translate_container ( _ c: Container<LayoutItem> ) {
+        for child in c.children {
+            if let text = child as? LocalizedText {
+                text.apply_translation( self.translations )
+            }
+            else if let cont = child as? Container {
+                cont.translate_container( self.translations )
+            }
+        }
+        
+    }
+    
+    public func localizedString( _ key: String ) -> String {
+        self.translations[ key ] ?? key
+    }
+    
+    // MARK: - Conversion types
     
     var locale_id:String = "es_ES"
     open var localeIdentifier:String {
@@ -293,7 +301,5 @@ open class RenderContext {
         return dateFormatter.string(from: value ?? Date())
     }
  
-    
-    open func beginPage ( _ page: LayoutItem ) { }
-    open func endPage   ( _ page: LayoutItem ) { }
+
 }
