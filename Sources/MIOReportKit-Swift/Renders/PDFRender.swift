@@ -243,16 +243,21 @@ public class PDFRender: RenderContext
             let data = try? MIOCoreURLDataRequest_sync( r )
             print("*** URL Image retrieve data from url")
             if data != nil {
-                pdf.createPVF( filename: img.url, data: data! )
-                print("*** URL Image create pvf PDFLIB")
-                if let image = try? pdf.loadImage(fileName: img.url) {
+                let fn = String( img.url.split(separator: "/").last! )
+                pdf.createPVF( filename: fn, data: data! )
+                print("*** URL Image create pvf PDFLIB: \(fn)")
+                do {
+                    let image = try pdf.loadImage(fileName: img.url)
                     print("*** URL Image load image PDFLIB")
                     let pos = self.pos( img )
                     pdf.fitImage(image: image, x: pos.x, y: pos.y, options: "boxsize={\(item.dimensions.width) \(item.dimensions.height)} fitmethod=auto position={ \(imageAlignString ( img.align ) ) center }")
 //                    pdf.fitImage(image: image, x: pos.x, y: pos.y, options: "boxsize={\(item.dimensions.width) \(item.dimensions.height)} fitmethod=auto")
                     pdf.closeImage( image: image )
                 }
-                pdf.deletePVF( filename: img.url )
+                catch {
+                    print( "*** URL Image error: \(error)")
+                }
+                pdf.deletePVF( filename: fn )
             }
         }
     }
