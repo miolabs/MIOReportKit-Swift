@@ -56,14 +56,16 @@ public class Table: FooterHeaderContainer< HStack<Text>, HStack<Text> > {
         footer!.add( Text( "", flex: flex, id: id, textSize: textSize, bold: bold, align: align, wrap: wrap ) )
     }
 
-    public func addRow ( _ dict: [String:Any], bold: Bool = false, italic: Bool = false ) {
+    public func addRow ( _ dict: [String:Any], bold: Bool = false, italic: Bool = false, textColor:String? = nil ) {
         let table_row = HStack( )
         
         for i in cols_key.indices {
             let key = cols_key[ i ]
             let col = header!.children[ i ]
             
-            table_row.add( Text( "\(dict[ key ] ?? "")", bold: bold, italic: italic, align: col.align, wrap: col.wrap ) )
+            let txt = Text( "\(dict[ key ] ?? "")", bold: bold, italic: italic, align: col.align, wrap: col.wrap )
+            if textColor != nil { txt.foregroundColor(textColor!) }
+            table_row.add( txt )
         }
         
         body.add( table_row )

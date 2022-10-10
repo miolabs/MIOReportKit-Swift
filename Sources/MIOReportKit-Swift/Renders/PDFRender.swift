@@ -241,7 +241,7 @@ public class PDFRender: RenderContext
         else if let img = item as? URLImage {
             let r = URLRequest( urlString: img.url )
             let data = try? MIOCoreURLDataRequest_sync( r )
-            print("*** URL Image retrieve data from url")
+            print("*** URL Image retrieve data from url: \(img.url)")
             if data != nil {
                 let fn = String( img.url.split(separator: "/").last! )
                 pdf.createPVF( filename: fn, data: data! )
