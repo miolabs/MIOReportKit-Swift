@@ -7,8 +7,12 @@
 
 import Foundation
 import PDFLib_Swift
-// import DualLinkDB
 import MIOCore
+
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+
 
 public class PDFRender: RenderContext
 {
@@ -20,7 +24,6 @@ public class PDFRender: RenderContext
     var pageMargin: Margin = Margin( )
     
     var offsetY:Float = 0
-    var pageOffsetY:Float = 0
     
     var resourcesPath:String?
     public override func setResourcesPath( _ path: String ) {
@@ -102,7 +105,7 @@ public class PDFRender: RenderContext
     
     public func rect ( _ item: LayoutItem ) {
         defer {
-            setColor( "#000000" )
+            setColor( "#000000", "fillstroke")
         }
         
         let p = pos( item )
@@ -114,9 +117,7 @@ public class PDFRender: RenderContext
         let l = item.style.borderWidth.left
         
         if bg != nil {
-            let bg_color = parse_color( bg! )
-
-            pdf.setColor(fstype: "fill", colorspace: "rgb", c1: bg_color.r, c2: bg_color.g, c3: bg_color.b)
+            setColor( bg )
             pdf.rect( x: p.x
                     , y: p.y
                     , width:  Double( item.dimensions.width  )
@@ -125,7 +126,8 @@ public class PDFRender: RenderContext
         }
                 
         //TODO: Hack to render rounded rectangle only with all the border > 0
-        if t > 0 && l > 0 && b > 0 && r > 0 {
+        if t > 0 && l > 0 && b > 0 && r > 0 && item.style.borderRadius > 0 {
+            setColor( fg, "stroke" )
             let rdx = Double( item.style.borderRadius )
             pdf.moveTo( x: p.x + rdx, y: p.y)
             pdf.lineTo( x: p.x + Double( item.dimensions.width ) - rdx, y: p.y )
@@ -136,7 +138,6 @@ public class PDFRender: RenderContext
             pdf.arc   ( x: p.x + rdx, y: p.y - rdx + Double( item.dimensions.height ), radius: rdx, alpha: 90, beta: 180 )
             pdf.lineTo( x: p.x, y: p.y + rdx )
             pdf.arc   ( x: p.x + rdx, y: p.y + rdx, radius: rdx, alpha: 180, beta: 270 )
-            
             pdf.stroke()
             return
         }
@@ -179,22 +180,20 @@ public class PDFRender: RenderContext
         
     }
     
-    func setColor ( _ fg: String?, _ fstype: String = "fill" ) {
-        if fg == nil {
-            return
-        }
+    func setColor ( _ color: String?, _ fstype: String = "fill" ) {
+        if color == nil { return }
         
-        let fg_color = parse_color( fg! )
-        
-        pdf.setColor(fstype: fstype, colorspace: "rgb", c1: fg_color.r, c2: fg_color.g, c3: fg_color.b)
+        let color = parse_color( color! )
+        pdf.setColor(fstype: fstype, colorspace: "rgb", c1: color.r, c2: color.g, c3: color.b)
     }
     
     
     public func pos ( _ item: LayoutItem ) -> (x: Double, y: Double) {
         let abs_pos = item.absPosition( )
+        let y = offsetY - (abs_pos.y + item.dimensions.height)  + pageMargin.top
         
         return ( x: Double( abs_pos.x + pageMargin.left )
-               , y: Double( offsetY - abs_pos.y - item.dimensions.height + pageMargin.top ) )
+               , y: Double( y ) )
     }
     
     
@@ -202,10 +201,14 @@ public class PDFRender: RenderContext
         super.endContainer(container)
     }
     
-    let textAlign = ["left", "center", "right"]
-    func textAlignString( _ align: TextAlign) -> String {
-        return textAlign[ align.rawValue ]
+    let _align:[String] = ["left", "center", "right"]
+    func textAlignString( _ align: TextAlign ) -> String {
+        return _align[ align.rawValue ]
     }
+    func imageAlignString( _ align: ImageAlign ) -> String {
+        return _align[ align.rawValue ]
+    }
+
     
     override open func renderItem ( _ item: LayoutItem ) {
         rect( item )
@@ -226,35 +229,41 @@ public class PDFRender: RenderContext
             opts.append( "boxsize={\(text.dimensions.width) \(text.dimensions.height)}" )
             opts.append( "position={" + textAlignString ( text.align ) + " bottom }" )
             opts.append( "fitmethod=auto" )
-            opts.append( "margin=1" )
+            //opts.append( "margin=2" )
             let pos = self.pos( text )
             // Note => +4 = baseline?
             try? pdf.fitTextLine( text: text.text
-                                , x: pos.x + 4
-                                , y: pos.y + 4 // 2 of air + 2 of descent?
+                                , x: pos.x
+                                , y: pos.y + 4
                                 , options: opts.joined(separator: " "))
         }
         else if let img = item as? URLImage {
             let r = URLRequest( urlString: img.url )
             let data = try? MIOCoreURLDataRequest_sync( r )
+            print("*** URL Image retrieve data from url: \(img.url)")
             if data != nil {
-                pdf.createPVF(filename: img.url, data: data!)
-                if let image = try? pdf.loadImage(fileName: img.url) {
+                let fn = String( img.url.split(separator: "/").last! )
+                pdf.createPVF( filename: fn, data: data! )
+                print("*** URL Image create pvf PDFLIB: \(fn)")
+                do {
+                    let image = try pdf.loadImage(fileName: fn )
+                    print("*** URL Image load image PDFLIB")
                     let pos = self.pos( img )
-                    pdf.fitImage(image: image, x: pos.x, y: pos.y, options: "boxsize={\(item.dimensions.width) \(item.dimensions.height)} fitmethod=auto") //pos.x, y: pos.y, options: "boxsize={\(item.dimensions.width) \(item.dimensions.height)}" )
+                    pdf.fitImage(image: image, x: pos.x, y: pos.y, options: "boxsize={\(item.dimensions.width) \(item.dimensions.height)} fitmethod=auto position={ \(imageAlignString ( img.align ) ) center }")
+//                    pdf.fitImage(image: image, x: pos.x, y: pos.y, options: "boxsize={\(item.dimensions.width) \(item.dimensions.height)} fitmethod=auto")
+                    pdf.closeImage( image: image )
                 }
+                catch {
+                    print( "*** URL Image error: \(error.localizedDescription)")
+                }
+                pdf.deletePVF( filename: fn )
             }
         }
     }
         
     
     func clip ( _ item: LayoutItem ) -> Bool {
-        if let text = item as? Text {
-            if text.text.starts(with: "ICE TEA-") {
-                print( text.text )
-            }
-        }
-        return item.absPosition().y < 0 // >= offsetY
+        return false // item.absPosition().y < 0
     }
     
     
@@ -265,10 +274,16 @@ public class PDFRender: RenderContext
     override open func meassure ( _ item: LayoutItem ) -> Size {
         if let text = item as? Text {
             let fs = fontSizeInPoints( text.text_size )
-            let w = pdf.stringWidth(text.text, font: defaultFont, size: fs )
             let descent: Double = 2
+            var offset_y: Float = 0
+            
+            let w = pdf.stringWidth("\(text.text)", font: text.bold ? defaultFontBold : defaultFont, size: fs )
+            if Float ( w ) > PDF.A4.width && text.wrap == .wrap {
+                offset_y = ( Float(w) / PDF.A4.width ) + 1
+            }
+            
             // Text needs air
-            return Size( width: Float( w ), height: Float (fs + descent + 4.0) )
+            return Size( width: Float( w ), height: Float (fs + descent + 4.0) + offset_y )
         }
         else if let sp = item as? Space {
             return Size( width: Float (sp.a.rawValue) * 4, height: Float (sp.b.rawValue) * 4 )
@@ -303,12 +318,14 @@ public class PDFRender: RenderContext
         return (0, 0, 0, 0)
     }
     
-    open override func beginPage ( _ page: LayoutItem) {
+    open override func beginPage ( _ page: Page ) {
+        super.beginPage( page )
         pdf.beginPage(options: "width=a4.width height=a4.height")
     }
     
     
-    open override func endPage ( _ page: LayoutItem) {
+    open override func endPage ( _ page: Page ) {
+        super.endPage( page )
         pdf.endPage()
     }
 

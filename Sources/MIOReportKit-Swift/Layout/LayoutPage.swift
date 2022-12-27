@@ -20,6 +20,19 @@ public class Page: FooterHeaderContainer<LayoutItem, LayoutItem>
         self.dimensions = size
     }
     
+    public override func clone ( ) -> Page {
+        let ret = Page( size, page_num )
+        ret.copyValues( self )
+        
+        return ret
+    }
+    
+    public func copyValues (_ src: Page ) {
+        page_num = src.page_num
+        margins = src.margins
+        super.copyValues( src as FooterHeaderContainer<LayoutItem, LayoutItem> )
+    }
+    
     override open func meassure ( _ context: RenderContext )
     {
         // DO NOT modify the size of a page, as renders treat them in special way

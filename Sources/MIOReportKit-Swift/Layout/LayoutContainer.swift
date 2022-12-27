@@ -21,6 +21,20 @@ public class Container< E: LayoutItem >: LayoutItem {
         super.init( flex, id )
     }
     
+    public override func clone ( ) -> Container< E > {
+        let ret = Container< E >( flex, id )
+        ret.copyValues( self )
+        
+        return ret
+    }
+    
+    public func copyValues(_ src: Container<E> ) {
+        delegate = src.delegate
+        growDirection = src.growDirection
+        children = src.children.map{ $0.clone( ) as! E }
+        super.copyValues( src as LayoutItem )
+    }
+    
     public func add ( _ item: E ) {
         children.append( item )
         
@@ -95,6 +109,20 @@ public class FooterHeaderContainer< H:LayoutItem, F: LayoutItem> : VStack<Layout
 
         self.header?.parent = self
         self.footer?.parent = self        
+    }
+
+    public override func clone ( ) -> FooterHeaderContainer< H, F > {
+        let ret = FooterHeaderContainer( header: header?.clone() as? H
+                                       , footer: footer?.clone() as? F )
+        ret.copyValues( self )
+        
+        return ret
+    }
+    
+    public func copyValues (_ src: FooterHeaderContainer< H, F > ) {
+        hideFooter = src.hideFooter
+        hideHeader = src.hideHeader
+        super.copyValues( src as VStack<LayoutItem> )
     }
 }
 

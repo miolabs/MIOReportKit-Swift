@@ -14,8 +14,14 @@ public class HStack< E: LayoutItem >: Container<E> {
         super.init( flex, id )
         growDirection = .horizontal
     }
-    
-    
+       
+    public override func clone ( ) -> HStack< E > {
+        let ret = HStack( flex, id )
+        ret.copyValues( self as Container<E> )
+        
+        return ret
+    }
+
     override open func meassure (_ context: RenderContext ) {
         super.meassure( context )
 
@@ -63,6 +69,13 @@ public class VStack< E: LayoutItem >: Container<E> {
         growDirection = .vertical
     }
     
+    public override func clone ( ) -> VStack< E > {
+        let ret = VStack( flex, id )
+        ret.copyValues( self as Container<E> )
+        
+        return ret
+    }
+
     override open func meassure(_ context: RenderContext) {
         super.meassure( context )
 

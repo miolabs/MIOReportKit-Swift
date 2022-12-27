@@ -27,7 +27,7 @@ public class Text: LayoutItem {
     public var italic: Bool
     public var bold: Bool
     public var text_size: ItemSize
-    public var formmaterType: FormatterType
+    public var formmatterType: FormatterType
     
     public init ( _ text: String, flex: Int = 0, id: String? = nil, textSize: ItemSize = .s, bold: Bool = false, italic: Bool = false, align: TextAlign = .left, wrap: TextWrap = .wrap, formatterType: FormatterType = .string ) {
         self.original_text = text
@@ -37,12 +37,30 @@ public class Text: LayoutItem {
         self.wrap  = wrap
         self.italic = italic
         self.bold = bold
-        self.formmaterType = formatterType
+        self.formmatterType = formatterType
         super.init()
-        self.flex = 0
+        self.flex = flex
         self.id = id
     }
 
+    public override func clone ( ) -> Text {
+        let ret = Text( original_text )
+        ret.copyValues( self )
+        
+        return ret
+    }
+    
+    public func copyValues (_ src: Text ) {
+        original_text = src.text
+        text          = src.text
+        text_size     = src.text_size
+        align         = src.align
+        wrap          = src.wrap
+        italic        = src.italic
+        bold          = src.bold
+        formmatterType = src.formmatterType
+        super.copyValues( src as LayoutItem )
+    }
     
     override func setValue(_ value: Any) throws {
         if let new_text = value as? String {
@@ -65,7 +83,7 @@ public class Text: LayoutItem {
         ret.italic = italic
         ret.bold = bold
         ret.text_size = text_size
-        ret.formmaterType = formmaterType
+        ret.formmatterType = formmatterType
     }
     
 }
@@ -74,6 +92,6 @@ public class Text: LayoutItem {
 
 public class LocalizedText: Text {
     func apply_translation ( _ d: [String:String] ) {
-       self.text = d[ self.original_text ] ?? "__\(self.original_text)__"
+       self.text = d[ self.original_text ] ?? self.original_text
     }
 }

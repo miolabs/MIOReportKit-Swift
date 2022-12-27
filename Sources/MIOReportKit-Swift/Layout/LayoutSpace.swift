@@ -17,4 +17,17 @@ public class Space: LayoutItem {
         self.b = b
         super.init( )
     }
+    
+    public override func clone ( ) -> Space {
+        let ret = Space( a, b )
+        ret.copyValues( self )
+        
+        return ret
+    }
+    
+    public func copyValues (_ src: Space ) {
+        a = src.a
+        b = src.b
+        super.copyValues( src as LayoutItem )
+    }
 }

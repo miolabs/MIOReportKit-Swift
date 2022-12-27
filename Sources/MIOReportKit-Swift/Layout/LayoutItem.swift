@@ -34,6 +34,11 @@ open class LayoutItem {
         self.style = Style( )
     }
     
+    open func clone ( ) -> LayoutItem {
+        // LayoutItem is so simple that clone is like a shallowCopy
+        return shallowCopy( )
+    }
+    
     open func shallowCopy ( ) -> LayoutItem {
         let ret = LayoutItem( flex, id )
         ret.copyValues( self )
@@ -41,15 +46,17 @@ open class LayoutItem {
         return ret
     }
     
-    open func copyValues ( _ ret: LayoutItem ) {
-        flex = ret.flex
-        id = ret.id
-        x = ret.x
-        y = ret.y
-        dimensions = ret.dimensions
-        size = ret.size
+    open func copyValues ( _ src: LayoutItem ) {
+        flex = src.flex
+        id = src.id
+        x = src.x
+        y = src.y
+        dimensions = src.dimensions
+        size = src.size
+        parent = src.parent
+        include_in_pages = src.include_in_pages
         
-        style.copyValues( ret.style )
+        style.copyValues( src.style )
     }
     
     @discardableResult
@@ -106,6 +113,7 @@ open class LayoutItem {
         
         return (x:abs_x, y: abs_y)
     }
+    
 }
 
 

@@ -94,7 +94,7 @@ public class Layout: AddProtocol {
             let end_page   = page_for_offset( item.y + item.dimensions.height )
             
             for i in start_page ... end_page {
-                ret[ i ].add( item )
+                ret[ i ].add( item.clone( ) )
             }
         }
         

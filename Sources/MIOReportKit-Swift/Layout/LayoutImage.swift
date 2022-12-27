@@ -7,15 +7,42 @@
 
 import Foundation
 
+// TODO: Add support for Top, middle and bottom align
+public enum ImageAlign: Int {
+    case left   = 0
+    case center = 1
+    case right  = 2
+}
+
 
 public class Image: LayoutItem {
     public var data: Data
     public var imgSize: Size
+    public var align: ImageAlign = .center
     
     public init ( data: Data, width: Float, height: Float, flex: Int = 0, id: String? = nil ) {
         self.data = data
         self.imgSize = Size( width: width, height: height )
         super.init( flex, id)
+    }
+        
+    public func align ( _ value: ImageAlign ) -> Self {
+        align = value
+        return self
+    }
+    
+    public override func clone ( ) -> Image {
+        let ret = Image( data: data, width: imgSize.width, height: imgSize.height, flex: flex, id: id )
+        ret.copyValues( self )
+        
+        return ret
+    }
+    
+    public func copyValues(_ src: Image ) {
+        data = src.data
+        imgSize = src.imgSize
+        align = src.align
+        super.copyValues( src as LayoutItem )
     }
     
     override open func meassure ( _ context: RenderContext ) {
@@ -42,6 +69,7 @@ public class Image: LayoutItem {
 public class URLImage: LayoutItem {
     public var url: String
     public var imgSize: Size
+    public var align: ImageAlign = .right
     
     public init ( url: String, width: Float, height: Float, flex: Int = 0, id: String? = nil ) {
         self.url = url
@@ -49,6 +77,11 @@ public class URLImage: LayoutItem {
         super.init( )
         self.flex = flex
         self.id = id
+    }
+    
+    public func align ( _ value: ImageAlign ) -> Self {
+        align = value
+        return self
     }
     
     override open func meassure ( _ context: RenderContext ) {

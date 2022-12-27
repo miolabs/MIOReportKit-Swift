@@ -9,10 +9,15 @@ import Foundation
 
 
 public class Padding: VStack<LayoutItem> {
+    var padded_item: LayoutItem
+    var edge_sizes: EdgeSizes
+    
     public init ( _ item: LayoutItem
-                , _ top: ItemSize, _ right: ItemSize, _ bottom: ItemSize, _ left: ItemSize
+                , top: ItemSize = .none, right: ItemSize = .none, bottom: ItemSize = .none, left: ItemSize = .none
                 , flex: Int = 0, id: String? = nil
                 ) {
+        self.padded_item = item
+        edge_sizes = .init( top: top, right: right, bottom: bottom, left: left )
         super.init( flex, id )
         
         let hstack = HStack( 1 )
@@ -26,5 +31,18 @@ public class Padding: VStack<LayoutItem> {
         add( hstack )
         
         if bottom.rawValue > 0 { add( Space( top ) ) }
+    }
+    
+    override open func clone ( ) -> Padding {
+        let ret = Padding( padded_item.clone()
+        , top: edge_sizes.top
+        , right: edge_sizes.right
+        , bottom: edge_sizes.bottom
+        , left: edge_sizes.left
+        , flex: flex
+        , id: id
+        )
+        ret.copyValues( self )
+        return ret
     }
 }
