@@ -22,6 +22,7 @@ open class LayoutItem {
     var y: Float
     var size: Size
     var dimensions: Size
+    var is_unbreakable: Bool
     public var style: Style
     
     public init ( _ flex: Int = 0, _ id: String? = nil ) {
@@ -32,6 +33,12 @@ open class LayoutItem {
         self.dimensions = Size( )
         self.size = Size( )
         self.style = Style( )
+        self.is_unbreakable = false
+    }
+    
+    open func unbreakable ( ) -> LayoutItem {
+        is_unbreakable = true
+        return self
     }
     
     open func clone ( ) -> LayoutItem {
@@ -55,6 +62,7 @@ open class LayoutItem {
         size = src.size
         parent = src.parent
         include_in_pages = src.include_in_pages
+        is_unbreakable = src.is_unbreakable
         
         style.copyValues( src.style )
     }

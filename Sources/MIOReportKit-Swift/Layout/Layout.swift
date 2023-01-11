@@ -64,12 +64,30 @@ public class Layout: AddProtocol {
         
         flat_items_rec( rootItem, &flat_items )
         
+        // have to make unbreakable first
+        var j = 0
+        for i in 0..<flat_items.count {
+            let item = flat_items[ i ]
+            
+            if item.is_unbreakable {
+                flat_items.remove(at: i)
+                flat_items.insert( item, at: j)
+                j = j + 1
+            }
+        }
+        
         var ret: [Page] = [ page.newPage( 0 ) ]
 
-        func page_for_offset ( _ y: Float ) -> Int {
+        func page_for_offset ( _ item: LayoutItem, start: Bool ) -> Int {
+            let y = start ? item.y : item.y + item.dimensions.height
+            
             while ( (-ret.last!.y + ret.last!.dimensions.height) < y ) {
                 let new_page = page.newPage( ret.count )
                 new_page.y = Float(-ret.count) * page.dimensions.height
+                
+                if item.is_unbreakable && start == false {
+                    new_page.y = -item.y
+                }
                 
                 // CASE: the page cuts a line by half. We want the whole new line to start
                 // in the new page only
@@ -90,8 +108,8 @@ public class Layout: AddProtocol {
         }
         
         for item in flat_items {
-            let start_page = page_for_offset( item.y )
-            let end_page   = page_for_offset( item.y + item.dimensions.height )
+            let start_page = page_for_offset( item, start: true  )
+            let end_page   = page_for_offset( item, start: false )
             
             for i in start_page ... end_page {
                 ret[ i ].add( item.clone( ) )
