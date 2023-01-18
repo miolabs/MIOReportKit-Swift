@@ -218,9 +218,11 @@ public class PDFRender: RenderContext
         }
         
         if let text = item as? Text {
+            let fs = fontSizeInPoints(text.text_size)
             var opts:[String] = []
+        
             opts.append("font=\( text.bold ? defaultFontBold : defaultFont)" )
-            opts.append("fontsize=\(fontSizeInPoints(text.text_size))")
+            opts.append("fontsize=\(fs)")
             if text.style.fgColor != nil {
                 let (r,g,b,_) = parse_color(text.style.fgColor!)
                 opts.append("fillcolor={rgb \(r) \(g) \(b)}")
@@ -228,14 +230,49 @@ public class PDFRender: RenderContext
             }
             opts.append( "boxsize={\(text.dimensions.width) \(text.dimensions.height)}" )
             opts.append( "position={" + textAlignString ( text.align ) + " bottom }" )
-            opts.append( "fitmethod=auto" )
+            opts.append( "fitmethod=clip" )
             //opts.append( "margin=2" )
+        
             let pos = self.pos( text )
-            // Note => +4 = baseline?
-            try? pdf.fitTextLine( text: text.text
-                                , x: pos.x
-                                , y: pos.y + 4
-                                , options: opts.joined(separator: " "))
+            let fs_line_height: Float = Float( line_height( fs ) )
+            
+            if text.dimensions.height > fs_line_height {
+                let parts = text.text.split(separator: " " )
+                let sizes = parts.map{ Float( text_width( String( $0 ), size: fs, bold: text.bold ) ) }
+                let space_size = Float( text_width( " ", size: fs, bold: text.bold ) )
+
+                var i = 0
+                var cur_line: Float = 0
+                
+                while i < parts.count {
+                    var sentence: [String] = []
+                    var sentence_size: Float = 0
+                    while i < parts.count && (sentence_size + sizes[ i ] + Float( sentence.count ) * space_size) < text.dimensions.width {
+                        sentence.append( String( parts[ i ] ) )
+                        sentence_size = sentence_size + sizes[ i ]
+                        i = i + 1
+                    }
+
+                    cur_line = cur_line + 1
+
+                    try? pdf.fitTextLine( text: sentence.joined(separator: " ")
+                                        , x: pos.x
+                                        , y: Double(  Float( pos.y + 4 )
+                                                    + Float( text.dimensions.height )
+                                                    - Float( cur_line * fs_line_height )
+                                                   )
+                                        , options: opts.joined(separator: " "))
+                    
+                }
+                
+            
+            } else {
+                // Note => +4 = baseline?
+                try? pdf.fitTextLine( text: text.text
+                                    , x: pos.x
+                                    , y: pos.y + 4
+                                    , options: opts.joined(separator: " "))
+            }
         }
         else if let img = item as? URLImage {
             let r = URLRequest( urlString: img.url )
@@ -274,16 +311,16 @@ public class PDFRender: RenderContext
     override open func meassure ( _ item: LayoutItem ) -> Size {
         if let text = item as? Text {
             let fs = fontSizeInPoints( text.text_size )
-            let descent: Double = 2
-            var offset_y: Float = 0
+            let fs_line_height: Double = line_height( fs )
+            var num_lines: Float = 1
             
-            let w = pdf.stringWidth("\(text.text)", font: text.bold ? defaultFontBold : defaultFont, size: fs )
+            let w = text_width( text.text, size: fs, bold: text.bold )
             if Float ( w ) > PDF.A4.width && text.wrap == .wrap {
-                offset_y = ( Float(w) / PDF.A4.width ) + 1
+                num_lines = ceil( ( Float(w) / PDF.A4.width ) )
             }
             
             // Text needs air
-            return Size( width: Float( w ), height: Float (fs + descent + 4.0) + offset_y )
+            return Size( width: Float( w ), height: Float( fs_line_height ) * num_lines )
         }
         else if let sp = item as? Space {
             return Size( width: Float (sp.a.rawValue) * 4, height: Float (sp.b.rawValue) * 4 )
@@ -292,6 +329,21 @@ public class PDFRender: RenderContext
         return super.meassure( item )
     }
     
+    func text_width ( _ text: String, size: Double, bold: Bool ) -> Double {
+        var opts:[String] = []
+        opts.append("font=\(bold ? defaultFontBold : defaultFont)" )
+        opts.append("fontsize=\(size)")
+        opts.append( "fitmethod=nofit" )
+        
+        // let h = pdf.infoTextline( "\(text.text)", 0, "height", opts.joined(separator: " ") )
+        return pdf.stringWidth("\(text)", font: bold ? defaultFontBold : defaultFont, size: size )
+    }
+    
+    func line_height ( _ fs: Double ) -> Double {
+        let descent: Double = 2
+
+        return (fs + descent + 4.0)
+    }
     
     func parse_color( _ hex:String) -> (r:Double, g:Double, b:Double, a:Double){
         
