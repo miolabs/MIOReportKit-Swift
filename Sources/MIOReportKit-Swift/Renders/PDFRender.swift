@@ -230,7 +230,7 @@ public class PDFRender: RenderContext
             }
             opts.append( "boxsize={\(text.dimensions.width) \(text.dimensions.height)}" )
             opts.append( "position={" + textAlignString ( text.align ) + " bottom }" )
-            opts.append( "fitmethod=clip" )
+            opts.append( "fitmethod=nofit" )
             //opts.append( "margin=2" )
         
             let pos = self.pos( text )
@@ -329,7 +329,7 @@ public class PDFRender: RenderContext
         return super.meassure( item )
     }
     
-    func text_width ( _ text: String, size: Double, bold: Bool ) -> Double {
+    func text_width ( _ text: String,   size: Double, bold: Bool ) -> Double {
         var opts:[String] = []
         opts.append("font=\(bold ? defaultFontBold : defaultFont)" )
         opts.append("fontsize=\(size)")
