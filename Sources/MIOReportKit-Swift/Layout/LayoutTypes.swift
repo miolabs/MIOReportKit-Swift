@@ -280,7 +280,7 @@ open class RenderContext {
     open func stringNumber ( from value: NSDecimalNumber? ) -> String {
         let d = value?.doubleValue ?? 0
         let number = NSNumber( floatLiteral: d )
-//        numberFormatter.minimumFractionDigits = floor( d ) == d ? 0 : 2
+        numberFormatter.minimumFractionDigits = floor( d ) == d ? 0 : 2
         return numberFormatter.string(from: number)!
     }
     
