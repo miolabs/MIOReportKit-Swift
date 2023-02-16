@@ -245,7 +245,7 @@ open class RenderContext {
         
         currency_formatter = NumberFormatter()
         currency_formatter!.locale = Locale(identifier: locale_id )
-        currency_formatter!.numberStyle = .decimal
+        currency_formatter!.numberStyle = .currency
         currency_formatter!.minimumFractionDigits = 2
         currency_formatter!.maximumFractionDigits = 2
        
@@ -278,24 +278,17 @@ open class RenderContext {
     }
     
     open func stringNumber ( from value: NSDecimalNumber? ) -> String {
-        print("*** stringNumber:nsdecimal: \(value)")
-        let d = value?.doubleValue ?? 0
-        
-        return String( format: "%.2f", locale: Locale(identifier: locale_id), d )        
-
 //        let number = NSNumber( floatLiteral: d )
 //        numberFormatter.minimumFractionDigits = floor( d ) == d ? 0 : 2
-//        return numberFormatter.string(from: number)!
+        return numberFormatter.string(from: value ?? 0 )!
     }
     
     open func stringNumber ( from value: Decimal? ) -> String {
-        print("*** stringNumber:decimal \(value)")
         let d = NSDecimalNumber(decimal: value ?? 0)
         return stringNumber( from: d )
     }
 
     open func stringNumber ( from value: Int? ) -> String {
-        print("*** stringNumber:int \(value)")
         let number = NSNumber( integerLiteral: value ?? 0 )
         return numberFormatter.string(from: number)!
     }
