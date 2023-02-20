@@ -258,7 +258,7 @@ open class RenderContext {
         
         number_formatter = NumberFormatter()
         number_formatter!.locale = Locale(identifier: locale_id )
-        currency_formatter!.numberStyle = .decimal
+        number_formatter!.numberStyle = .decimal
         number_formatter!.minimumFractionDigits = 0
         number_formatter!.maximumFractionDigits = 2
        
