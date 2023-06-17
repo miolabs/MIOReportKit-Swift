@@ -246,8 +246,9 @@ open class RenderContext {
         currency_formatter = NumberFormatter()
         currency_formatter!.locale = Locale(identifier: locale_id )
         // PDFLib 7 not print with Euro symbol
-//        currency_formatter!.numberStyle = .currency
-        currency_formatter!.numberStyle = .decimal
+        currency_formatter!.numberStyle = .currency
+//        currency_formatter!.numberStyle = .decimal
+        currency_formatter!.currencySymbol = ""
         currency_formatter!.minimumFractionDigits = 2
         currency_formatter!.maximumFractionDigits = 2
        

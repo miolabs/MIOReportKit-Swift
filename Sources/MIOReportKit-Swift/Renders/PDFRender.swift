@@ -221,7 +221,7 @@ public class PDFRender: RenderContext
             let fs = fontSizeInPoints(text.text_size)
             var opts:[String] = []
         
-            opts.append("font=\( text.bold ? defaultFontBold : defaultFont)" )
+            opts.append("font=\( text.bold ? defaultFontBold : defaultFont )" )
             opts.append("fontsize=\(fs)")
             if text.style.fgColor != nil {
                 let (r,g,b,_) = parse_color(text.style.fgColor!)
