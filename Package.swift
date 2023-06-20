@@ -3,14 +3,14 @@
 
 import PackageDescription
 
-//#if os(iOS)
-let package_dependencies: [Package.Dependency] = [.package(url: "https://github.com/miolabs/MIOCore.git", .branch("main"))]
+#if os(iOS)
+let package_dependencies: [Package.Dependency] = [.package(url: "https://github.com/miolabs/MIOCore.git", .branch("master"))]
 let target_dependencies: [Target.Dependency] = ["MIOCore"]
-//#else
-//let package_dependencies:[Package.Dependency] = [ .package(url: "https://github.com/miolabs/PDFLib-Swift.git", .branch("main")),
-//]
-//let target_dependencies: [Target.Dependency] = ["PDFLib-Swift"]
-//#endif
+#else
+let package_dependencies:[Package.Dependency] = [ .package(url: "https://github.com/miolabs/PDFLib-Swift.git", .branch("main")),
+]
+let target_dependencies: [Target.Dependency] = ["PDFLib-Swift"]
+#endif
 
 
 let package = Package(
