@@ -7,13 +7,15 @@
 
 import Foundation
 
-public enum TextAlign: Int {
+public enum TextAlign: Int
+{
     case left   = 0
     case center = 1
     case right  = 2
 }
 
-public enum TextWrap: Int {
+public enum TextWrap: Int
+{
     case wrap   = 0
     case noWrap = 1
 }

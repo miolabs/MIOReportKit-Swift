@@ -69,5 +69,7 @@ public class Page: FooterHeaderContainer<LayoutItem, LayoutItem>
 
 public class A4: Page {
     // TODO: find a way to subclass or extend from other renders
-    public convenience init ( ) { self.init( Size( width: 595, height: 842 ) ) }
+    public convenience init ( ) { self.init( A4.size ) }
+    
+    public static var size = Size( width: 595, height: 842 )
 }

@@ -18,11 +18,11 @@ import FoundationNetworking
 
 public class PDFRender_CoreGraphics: RenderContext
 {
-    var context:UIGraphicsRendererContext!
-    var renderData:Data!
+    var context:CGContext!
+    var renderData = NSMutableData()
     
-    var defaultFont:Int32 = -1
-    var defaultFontBold:Int32 = -1
+    var defaultFont:UIFont = UIFont.systemFont( ofSize: UIFont.systemFontSize )
+    var defaultFontBold:UIFont = UIFont.boldSystemFont( ofSize: UIFont.systemFontSize )
     var pageMargin: Margin = Margin( )
     
     var offsetY:Float = 0
@@ -44,7 +44,12 @@ public class PDFRender_CoreGraphics: RenderContext
 //        defaultFontBold = (try? pdf.loadFont(name: "Helvetica-Bold", encoding: "winansi") ) ?? -1
         
         pageMargin = root.margins
-//        offsetY = PDF.A4.height - root.margins.top - root.margins.bottom
+//        offsetY = A4.size.height - root.margins.top - root.margins.bottom
+        UIGraphicsBeginPDFContextToData( renderData, CGRect(origin: CGPoint(), size: CGSize( width: Double( A4.size.width ), height: Double( A4.size.height ) ) ), nil )
+        
+        context = UIGraphicsGetCurrentContext()
+        
+        UIGraphicsBeginPDFPage()
         
     }
     
@@ -52,12 +57,13 @@ public class PDFRender_CoreGraphics: RenderContext
         super.endRender()
         
 //        pdf.endDocument()
-        
 //        renderData = pdf.pdfData()
+        
+        UIGraphicsEndPDFContext()
     }
     
     public override func output() -> Data {
-        return renderData
+        return renderData as Data
     }
             
     public override func beginContainer(_ container: Container<LayoutItem>) {
@@ -115,6 +121,7 @@ public class PDFRender_CoreGraphics: RenderContext
         
         if bg != nil {
             setColor( bg )
+            UIRectFill( CGRect(x: p.x, y: p.y, width: Double( item.dimensions.width  ), height: Double( item.dimensions.height ) ) )
 //            pdf.rect( x: p.x
 //                    , y: p.y
 //                    , width:  Double( item.dimensions.width  )
@@ -141,6 +148,12 @@ public class PDFRender_CoreGraphics: RenderContext
         
         if t > 0 {
             setColor( item.style.borderColor.top ?? fg )
+            UIRectFill( CGRect(x: p.x,
+                               y: p.y + Double( item.dimensions.height ) - Double( t ),
+                               width: Double( item.dimensions.width  ),
+                               height: Double( t ) )
+                      )
+
 //            pdf.rect( x: p.x
 //                    , y: p.y + Double( item.dimensions.height ) - Double( t )
 //                    , width:  Double( item.dimensions.width  )
@@ -150,6 +163,12 @@ public class PDFRender_CoreGraphics: RenderContext
 
         if l > 0 {
             setColor( item.style.borderColor.left ?? fg )
+            UIRectFill( CGRect(x: p.x,
+                               y: p.y,
+                               width: Double( l ),
+                               height: Double( item.dimensions.height ) )
+                      )
+
 //            pdf.rect( x: p.x
 //                    , y: p.y
 //                    , width:  Double( l )
@@ -159,6 +178,12 @@ public class PDFRender_CoreGraphics: RenderContext
         
         if b > 0 {
             setColor( item.style.borderColor.bottom ?? fg )
+            UIRectFill( CGRect(x: p.x,
+                               y: p.y,
+                               width: Double( item.dimensions.width ),
+                               height: Double( b ) )
+                      )
+
 //            pdf.rect( x: p.x
 //                    , y: p.y
 //                    , width:  Double( item.dimensions.width  )
@@ -168,6 +193,12 @@ public class PDFRender_CoreGraphics: RenderContext
 
         if r > 0 {
             setColor( item.style.borderColor.right ?? fg )
+            UIRectFill( CGRect(x: p.x + Double( item.dimensions.width ) - Double( r ),
+                               y: p.y,
+                               width: Double( r ),
+                               height: Double( item.dimensions.height ) )
+                      )
+
 //            pdf.rect( x: p.x + Double( item.dimensions.width ) - Double( r )
 //                    , y: p.y
 //                    , width:  Double( r )
@@ -182,12 +213,18 @@ public class PDFRender_CoreGraphics: RenderContext
         
         let color = parse_color( color! )
 //        pdf.setColor(fstype: fstype, colorspace: "rgb", c1: color.r, c2: color.g, c3: color.b)
+        switch( fstype ) {
+        case "fill": context.setFillColor( red: color.r, green: color.g, blue: color.b, alpha: color.a )
+        case "stroke": context.setStrokeColor( red: color.r, green: color.g, blue: color.b, alpha: color.a )
+        default: break
+        }
     }
     
     
     public func pos ( _ item: LayoutItem ) -> (x: Double, y: Double) {
         let abs_pos = item.absPosition( )
-        let y = offsetY - (abs_pos.y + item.dimensions.height)  + pageMargin.top
+//        let y = offsetY - (abs_pos.y + item.dimensions.height)  + pageMargin.top
+        let y = (abs_pos.y + item.dimensions.height)  + pageMargin.top
         
         return ( x: Double( abs_pos.x + pageMargin.left )
                , y: Double( y ) )
@@ -216,18 +253,23 @@ public class PDFRender_CoreGraphics: RenderContext
         
         if let text = item as? Text {
             let fs = fontSizeInPoints(text.text_size)
-            var opts:[String] = []
-        
-            opts.append("font=\( text.bold ? defaultFontBold : defaultFont)" )
-            opts.append("fontsize=\(fs)")
+            
+            let txt_font = UIFont(name: text.bold ? defaultFontBold.fontName : defaultFont.fontName, size: fs )
+            let paragraphStyle = NSMutableParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
+            paragraphStyle.alignment = text.align.nsTextAlignment
+            paragraphStyle.lineBreakMode = NSLineBreakMode.byWordWrapping
+            
+            var txt_attr: [NSAttributedString.Key:Any] = [
+                .font: txt_font!,
+                .paragraphStyle: paragraphStyle
+            ]
+                    
             if text.style.fgColor != nil {
-                let (r,g,b,_) = parse_color(text.style.fgColor!)
-                opts.append("fillcolor={rgb \(r) \(g) \(b)}")
+                let (r,g,b,a) = parse_color( text.style.fgColor! )
+                let fg_color = UIColor(red: r, green: g, blue: b, alpha: a)
+                txt_attr[.foregroundColor] = fg_color
             }
-            opts.append( "boxsize={\(text.dimensions.width) \(text.dimensions.height)}" )
-            opts.append( "position={" + textAlignString ( text.align ) + " bottom }" )
-            opts.append( "fitmethod=nofit" )
-        
+            
             let pos = self.pos( text )
             let fs_line_height: Float = Float( line_height( fs ) )
             
@@ -249,7 +291,17 @@ public class PDFRender_CoreGraphics: RenderContext
                     }
 
                     cur_line = cur_line + 1
+                    let txt = sentence.joined(separator: " ")
+                    let y = Double(   Float( pos.y + 4 )
+                                    + Float( text.dimensions.height )
+                                    - Float( cur_line * fs_line_height )
+                                  )
+                                                                                       
+                    
+                    let bounds = CGRect(x: pos.x, y: y, width: Double(text.dimensions.width), height: Double(text.dimensions.height))
 
+                    (txt as NSString).draw(in: bounds, withAttributes: txt_attr )
+                    
 //                    try? pdf.fitTextLine( text: sentence.joined(separator: " ")
 //                                        , x: pos.x
 //                                        , y: Double(  Float( pos.y + 4 )
@@ -263,6 +315,9 @@ public class PDFRender_CoreGraphics: RenderContext
             
             } else {
                 // Note => +4 = baseline?
+                let bounds = CGRect(x: pos.x, y: pos.y, width: Double(text.dimensions.width), height: Double(text.dimensions.height))
+                (text.text as NSString).draw(in: bounds, withAttributes:txt_attr)
+
 //                try? pdf.fitTextLine( text: text.text
 //                                    , x: pos.x
 //                                    , y: pos.y + 4
@@ -310,9 +365,9 @@ public class PDFRender_CoreGraphics: RenderContext
             var num_lines: Float = 1
             
             let w = text_width( text.text, size: fs, bold: text.bold )
-//            if Float ( w ) > PDF.A4.width && text.wrap == .wrap {
-//                num_lines = ceil( ( Float(w) / PDF.A4.width ) )
-//            }
+            if Float ( w ) > A4.size.width && text.wrap == .wrap {
+                num_lines = ceil( ( Float(w) / A4.size.width ) )
+            }
             
             // Text needs air
             return Size( width: Float( w ), height: Float( fs_line_height ) * num_lines )
@@ -324,16 +379,15 @@ public class PDFRender_CoreGraphics: RenderContext
         return super.meassure( item )
     }
     
-    func text_width ( _ text: String,   size: Double, bold: Bool ) -> Double {
-        var opts:[String] = []
-        opts.append("font=\(bold ? defaultFontBold : defaultFont)" )
-        opts.append("fontsize=\(size)")
-        opts.append( "fitmethod=nofit" )
-        
+    func text_width ( _ text: String, size: Double, bold: Bool ) -> Double {
+
+        let font = UIFont(name: bold ? defaultFontBold.fontName : defaultFont.fontName, size: size )!
+        let attr = [NSAttributedString.Key.font: font ]
+        let size = (text as NSString).size(withAttributes: attr )
         // let h = pdf.infoTextline( "\(text.text)", 0, "height", opts.joined(separator: " ") )
 //        return pdf.stringWidth("\(text)", font: bold ? defaultFontBold : defaultFont, size: size )
         
-        return 0
+        return size.height
     }
     
     func line_height ( _ fs: Double ) -> Double {
@@ -378,6 +432,17 @@ public class PDFRender_CoreGraphics: RenderContext
 //        pdf.endPage()
     }
 
+}
+
+extension TextAlign
+{
+    var nsTextAlignment : NSTextAlignment {
+        switch self {
+        case .left: return NSTextAlignment.left
+        case .center: return NSTextAlignment.center
+        case .right: return NSTextAlignment.right
+        }
+    }
 }
 
 #endif
