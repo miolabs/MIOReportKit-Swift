@@ -18,11 +18,33 @@ import FoundationNetworking
 
 public class PDFRender_CoreGraphics: RenderContext
 {
+    var _default_font:UIFont = UIFont.systemFont( ofSize: UIFont.systemFontSize )
+    
+    public var defaultFont:UIFont {
+        get { return _default_font }
+        set { _default_font = newValue }
+    }
+
+    public func setFont( name:String ) {
+        let f = UIFont(name: name, size: 10)
+        _default_font = f ?? UIFont.systemFont( ofSize: UIFont.systemFontSize )
+    }
+
+    public func font( size: CGFloat, bold:Bool = false, italic:Bool = false ) -> UIFont {
+        var traits = UIFontDescriptor.SymbolicTraits()
+        if bold { traits.insert( .traitBold ) }
+        if italic { traits.insert( .traitItalic ) }
+        guard let fd = _default_font.fontDescriptor.withSymbolicTraits( traits ) else {
+            return _default_font.withSize( size )
+        }
+        
+        return UIFont(descriptor: fd, size: size )
+    }
+    
+    
     var context:CGContext!
     var renderData = NSMutableData()
-    
-    var defaultFont:UIFont = UIFont.systemFont( ofSize: UIFont.systemFontSize )
-    var defaultFontBold:UIFont = UIFont.boldSystemFont( ofSize: UIFont.systemFontSize )
+        
     var pageMargin: Margin = Margin( )
     
     var offsetY:Float = 0
@@ -254,13 +276,13 @@ public class PDFRender_CoreGraphics: RenderContext
         if let text = item as? Text {
             let fs = fontSizeInPoints(text.text_size)
             
-            let txt_font = UIFont(name: text.bold ? defaultFontBold.fontName : defaultFont.fontName, size: fs )
+            let txt_font = font(size: fs, bold: text.bold, italic: text.italic)
             let paragraphStyle = NSMutableParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
             paragraphStyle.alignment = text.align.nsTextAlignment
             paragraphStyle.lineBreakMode = NSLineBreakMode.byWordWrapping
             
             var txt_attr: [NSAttributedString.Key:Any] = [
-                .font: txt_font!,
+                .font: txt_font,
                 .paragraphStyle: paragraphStyle
             ]
                     
@@ -275,8 +297,8 @@ public class PDFRender_CoreGraphics: RenderContext
             
             if text.dimensions.height > fs_line_height {
                 let parts = text.text.split(separator: " " )
-                let sizes = parts.map{ Float( text_width( String( $0 ), size: fs, bold: text.bold ) ) }
-                let space_size = Float( text_width( " ", size: fs, bold: text.bold ) )
+                let sizes = parts.map{ Float( text_width( String( $0 ), size: fs, bold: text.bold, italic: text.italic ) ) }
+                let space_size = Float( text_width( " ", size: fs, bold: text.bold, italic: text.italic ) )
 
                 var i = 0
                 var cur_line: Float = 0
@@ -364,7 +386,7 @@ public class PDFRender_CoreGraphics: RenderContext
             let fs_line_height: Double = line_height( fs )
             var num_lines: Float = 1
             
-            let w = text_width( text.text, size: fs, bold: text.bold )
+            let w = text_width( text.text, size: fs, bold: text.bold, italic: text.italic )
             if Float ( w ) > A4.size.width && text.wrap == .wrap {
                 num_lines = ceil( ( Float(w) / A4.size.width ) )
             }
@@ -379,9 +401,9 @@ public class PDFRender_CoreGraphics: RenderContext
         return super.meassure( item )
     }
     
-    func text_width ( _ text: String, size: Double, bold: Bool ) -> Double {
+    func text_width ( _ text: String, size: Double, bold: Bool, italic:Bool ) -> Double {
 
-        let font = UIFont(name: bold ? defaultFontBold.fontName : defaultFont.fontName, size: size )!
+        let font = font( size: size, bold: bold, italic: italic )
         let attr = [NSAttributedString.Key.font: font ]
         let size = (text as NSString).size(withAttributes: attr )
         // let h = pdf.infoTextline( "\(text.text)", 0, "height", opts.joined(separator: " ") )
