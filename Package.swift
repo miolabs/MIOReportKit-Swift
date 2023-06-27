@@ -3,15 +3,6 @@
 
 import PackageDescription
 
-//#if os(iOS)
-let package_dependencies: [Package.Dependency] = [.package(url: "https://github.com/miolabs/MIOCore.git", .branch("master"))]
-let target_dependencies: [Target.Dependency] = ["MIOCore"]
-//#else
-//let package_dependencies:[Package.Dependency] = [ .package(url: "https://github.com/miolabs/PDFLib-Swift.git", .branch("main")),
-//]
-//let target_dependencies: [Target.Dependency] = ["PDFLib-Swift"]
-//#endif
-
 
 let package = Package(
     name: "MIOReportKit-Swift",
@@ -24,13 +15,19 @@ let package = Package(
             name: "MIOReportKit-Swift",
             targets: ["MIOReportKit-Swift"]),
     ],
-    dependencies: package_dependencies,
+    dependencies: [
+        .package( url: "https://github.com/miolabs/MIOCore.git", .branch("master") ),
+        .package( url: "https://github.com/miolabs/PDFLib-Swift.git", .branch("main") )
+    ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .target(
             name: "MIOReportKit-Swift",
-            dependencies: target_dependencies ),
+            dependencies: [
+                .product(name: "MIOCore", package: "MIOCore" ),
+                .product(name: "PDFLib-Swift", package: "PDFLib-Swift", condition: .when( platforms: [.macOS, .linux] ) )
+            ] ),
         .testTarget(
             name: "MIOReportKit-SwiftTests",
             dependencies: ["MIOReportKit-Swift"]),
