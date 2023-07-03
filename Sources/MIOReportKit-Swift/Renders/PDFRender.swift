@@ -21,6 +21,8 @@ public class PDFRender: RenderContext
     
     var defaultFont:Int32 = -1
     var defaultFontBold:Int32 = -1
+    var defaultFontItalic:Int32 = -1
+    var defaultFontBoldItalic:Int32 = -1
     var pageMargin: Margin = Margin( )
     
     var offsetY:Float = 0
@@ -41,6 +43,8 @@ public class PDFRender: RenderContext
 //        defaultFont = (try? pdf.loadFont(name: "Arial", encoding: "winansi", options: "embedding") ) ?? -1
         defaultFont = (try? pdf.loadFont(name: "Helvetica", encoding: "winansi" ) ) ?? -1
         defaultFontBold = (try? pdf.loadFont(name: "Helvetica-Bold", encoding: "winansi") ) ?? -1
+        defaultFontItalic = (try? pdf.loadFont(name: "Helvetica-Oblique", encoding: "winansi") ) ?? -1
+        defaultFontBoldItalic = (try? pdf.loadFont(name: "Helvetica-BoldOblique", encoding: "winansi") ) ?? -1
         
         pageMargin = root.margins
         offsetY = PDF.A4.height - root.margins.top - root.margins.bottom
@@ -208,6 +212,17 @@ public class PDFRender: RenderContext
     func imageAlignString( _ align: ImageAlign ) -> String {
         return _align[ align.rawValue ]
     }
+    
+    private func defaultFont(_ bold: Bool, _ italic: Bool) -> Int32 {
+        if bold && italic {
+            return defaultFontBoldItalic
+        } else if bold {
+            return defaultFontBold
+        } else if italic {
+            return defaultFontItalic
+        }
+        return defaultFont
+    }
 
     
     override open func renderItem ( _ item: LayoutItem ) {
@@ -221,7 +236,7 @@ public class PDFRender: RenderContext
             let fs = fontSizeInPoints(text.text_size)
             var opts:[String] = []
         
-            opts.append("font=\( text.bold ? defaultFontBold : defaultFont)" )
+            opts.append("font=\( defaultFont(text.bold, text.italic))" )
             opts.append("fontsize=\(fs)")
             if text.style.fgColor != nil {
                 let (r,g,b,_) = parse_color(text.style.fgColor!)
@@ -238,8 +253,8 @@ public class PDFRender: RenderContext
             
             if text.dimensions.height > fs_line_height {
                 let parts = text.text.split(separator: " " )
-                let sizes = parts.map{ Float( text_width( String( $0 ), size: fs, bold: text.bold ) ) }
-                let space_size = Float( text_width( " ", size: fs, bold: text.bold ) )
+                let sizes = parts.map{ Float( text_width( String( $0 ), size: fs, bold: text.bold, italic: text.italic ) ) }
+                let space_size = Float( text_width( " ", size: fs, bold: text.bold, italic: text.italic ) )
 
                 var i = 0
                 var cur_line: Float = 0
@@ -314,7 +329,7 @@ public class PDFRender: RenderContext
             let fs_line_height: Double = line_height( fs )
             var num_lines: Float = 1
             
-            let w = text_width( text.text, size: fs, bold: text.bold )
+            let w = text_width( text.text, size: fs, bold: text.bold, italic: text.italic)
             if Float ( w ) > PDF.A4.width && text.wrap == .wrap {
                 num_lines = ceil( ( Float(w) / PDF.A4.width ) )
             }
@@ -329,14 +344,14 @@ public class PDFRender: RenderContext
         return super.meassure( item )
     }
     
-    func text_width ( _ text: String,   size: Double, bold: Bool ) -> Double {
+    func text_width ( _ text: String,   size: Double, bold: Bool , italic: Bool) -> Double {
         var opts:[String] = []
-        opts.append("font=\(bold ? defaultFontBold : defaultFont)" )
+        opts.append("font=\(defaultFont(bold, italic))" )
         opts.append("fontsize=\(size)")
         opts.append( "fitmethod=nofit" )
         
         // let h = pdf.infoTextline( "\(text.text)", 0, "height", opts.joined(separator: " ") )
-        return pdf.stringWidth("\(text)", font: bold ? defaultFontBold : defaultFont, size: size )
+        return pdf.stringWidth("\(text)", font: defaultFont(bold, italic), size: size )
     }
     
     func line_height ( _ fs: Double ) -> Double {
