@@ -399,3 +399,4 @@ public class PDFRender: RenderContext
     }
     
 }
+#endif
