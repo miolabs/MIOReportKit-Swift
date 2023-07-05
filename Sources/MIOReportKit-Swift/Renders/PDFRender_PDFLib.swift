@@ -16,7 +16,7 @@ import FoundationNetworking
 #endif
 
 
-public class PDFRender: RenderContext
+public class PDFRender_PDFLib: RenderContext
 {
     var pdf = PDF()
     var renderData:Data!
