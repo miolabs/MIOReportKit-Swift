@@ -34,6 +34,10 @@ public class PDFRender_PDFLib: RenderContext
         resourcesPath = path
     }
     
+    public override func beginCoords ( ) -> Vector2D {
+        return Vector2D( x: 0, y: Float( currentPage + 1 ) * PDF.A4.height )
+    }
+
     public override func beginRender(_ root: Page ) {
         super.beginRender(root)
         

@@ -30,17 +30,21 @@ public class Layout: AddProtocol {
     }
 
     
-    public func render ( _ context: RenderContext, withPagination page: Page? = nil ) {
+    public func render ( _ context: RenderContext, withPagination page: Page? = nil, end: Bool = true ) {
         // In case page is the rootItem, its dimensions will change
         let original_page_dimensions = page?.dimensions
         
         context.translate_container( rootItem )
         
-        context.beginRender( rootItem )
+        if !context.hasBegan() {
+            context.beginRender( rootItem )
+        }
+        
             rootItem.meassure( context )
             // This triggers resizing in children that has flex
             rootItem.setDimension( rootItem.dimensions )
-            rootItem.setCoordinates( 0, 0 )
+            let coords = context.beginCoords()
+            rootItem.setCoordinates( coords.x, coords.y )
         
             if page != nil {
                 page!.dimensions = original_page_dimensions!
@@ -55,7 +59,10 @@ public class Layout: AddProtocol {
             } else {
                 rootItem.render( context )
             }
-        context.endRender( )
+        
+        if end {
+            context.endRender( )
+        }
     }
     
     
@@ -65,6 +72,7 @@ public class Layout: AddProtocol {
         flat_items_rec( rootItem, &flat_items )
         
         // have to make unbreakable first
+        // bubble sort to make unbreakable first
         var j = 0
         for i in 0..<flat_items.count {
             let item = flat_items[ i ]

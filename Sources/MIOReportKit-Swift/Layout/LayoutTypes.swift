@@ -170,6 +170,11 @@ public enum FormatterType {
     case time
 }
 
+public struct Vector2D {
+    var x: Float
+    var y: Float
+}
+
 open class RenderContext {
     var fgColor: String
     var bgColor: String
@@ -179,6 +184,7 @@ open class RenderContext {
     var contraintStack: [Constraint]
     var containerStack: [Container<LayoutItem>]
     var translations: [String:String]
+    var currentPage: Int
     
     public init ( _ trans: [String:String] = [:] ) {
         fgColor = "#000000"
@@ -189,8 +195,11 @@ open class RenderContext {
         contraintStack = []
         containerStack = []
         translations = trans
+        currentPage = 0
     }
             
+    open func beginCoords ( ) -> Vector2D { return Vector2D( x: 0, y: 0 ) }
+    open func hasBegan ( ) -> Bool { return containerStack.count > 0 }
     open func beginRender ( _ root: Page ) { containerStack = [root] }
     open func endRender ( ) { }
     
@@ -211,7 +220,7 @@ open class RenderContext {
     open func setResourcesPath( _ path:String ) { }
         
     open func beginPage ( _ page: Page ) { }
-    open func endPage   ( _ page: Page ) { }
+    open func endPage   ( _ page: Page ) { currentPage += 1 }
     
     // MARK: - Translations
     
