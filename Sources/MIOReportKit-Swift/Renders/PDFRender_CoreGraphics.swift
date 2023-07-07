@@ -75,9 +75,9 @@ public class PDFRender_CoreGraphics: RenderContext
         
         context = UIGraphicsGetCurrentContext()
         
-        UIGraphicsBeginPDFPage()
-        
     }
+    
+    
     
     public override func endRender() {
         super.endRender()
@@ -449,12 +449,14 @@ public class PDFRender_CoreGraphics: RenderContext
     
     open override func beginPage ( _ page: Page ) {
         super.beginPage( page )
+        UIGraphicsBeginPDFPage()
 //        pdf.beginPage(options: "width=a4.width height=a4.height")
+        
     }
     
     
     open override func endPage ( _ page: Page ) {
-        super.endPage( page )
+        super.endPage( page )        
 //        pdf.endPage()
     }
 
