@@ -67,7 +67,7 @@ public class PDFRender_CoreGraphics: RenderContext
         
         pageMargin = root.margins
 //        offsetY = A4.size.height - root.margins.top - root.margins.bottom
-        UIGraphicsBeginPDFContextToData( renderData, CGRect(origin: CGPoint(), size: CGSize( width: Double( A4.size.width ), height: Double( A4.size.height ) ) ), nil )
+        UIGraphicsBeginPDFContextToData( renderData, CGRect(origin: CGPoint(), size: CGSize( width: Double( root.size.width ), height: Double( root.size.height ) ) ), nil )
         
         context = UIGraphicsGetCurrentContext()
         
@@ -376,7 +376,7 @@ public class PDFRender_CoreGraphics: RenderContext
     }
     
     
-    let fontSize:[Double] = [0, 2, 4, 6, 8, 10, 14, 18, 30]
+    let fontSize:[Double] = [0, 4, 8, 8, 10, 14, 18, 24, 36]
     func fontSizeInPoints( _ size:ItemSize ) -> Double { return fontSize[ size.rawValue ] }
     var defaultFontSize:Double { get { return fontSizeInPoints (.s ) } }
     
@@ -387,8 +387,8 @@ public class PDFRender_CoreGraphics: RenderContext
             var num_lines: Float = 1
             
             let w = text_width( text.text, size: fs, bold: text.bold, italic: text.italic )
-            if Float ( w ) > A4.size.width && text.wrap == .wrap {
-                num_lines = ceil( ( Float(w) / A4.size.width ) )
+            if Float ( w ) > A4.landscapeSize.width && text.wrap == .wrap {
+                num_lines = ceil( ( Float(w) / A4.landscapeSize.width ) )
             }
             
             // Text needs air

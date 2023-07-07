@@ -69,7 +69,13 @@ public class Page: FooterHeaderContainer<LayoutItem, LayoutItem>
 
 public class A4: Page {
     // TODO: find a way to subclass or extend from other renders
-    public convenience init ( ) { self.init( A4.size ) }
+    public static var portraitSize = Size( width: 595, height: 842 )
+    public static var landscapeSize = Size( width: 842, height: 595 )
     
-    public static var size = Size( width: 595, height: 842 )
+    public static func portrait() -> A4 { return A4( A4.portraitSize ) }
+    public static func lanscape() -> A4 { return A4( A4.landscapeSize ) }
+    
+    public convenience init ( ) { self.init( A4.portraitSize ) }
+    
+
 }
