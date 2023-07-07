@@ -55,7 +55,7 @@ public class PDFRender_CoreGraphics: RenderContext
     }
     
     public override func beginCoords ( ) -> Vector2D {
-        return Vector2D( x: 0, y: Float( currentPage + 1 ) * A4.size.height )
+        return Vector2D( x: 0, y: Float( currentPageNumber + 1 ) * currentPage!.size.height )
     }
     
     public override func beginRender(_ root: Page ) {
@@ -456,7 +456,7 @@ public class PDFRender_CoreGraphics: RenderContext
     
     
     open override func endPage ( _ page: Page ) {
-        super.endPage( page )        
+        super.endPage( page )
 //        pdf.endPage()
     }
 
