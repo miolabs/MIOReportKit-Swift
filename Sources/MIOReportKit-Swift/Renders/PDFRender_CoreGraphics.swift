@@ -54,9 +54,9 @@ public class PDFRender_CoreGraphics: RenderContext
         resourcesPath = path
     }
     
-    public override func beginCoords ( ) -> Vector2D {
-        return Vector2D( x: 0, y: Float( currentPage + 1 ) * A4.size.height )
-    }
+    /*public override func beginCoords ( ) -> Vector2D {
+        return Vector2D( x: 0, y: Float( currentPage + 1 ) * A4.landscapeSize.height )
+    }*/
     
     public override func beginRender(_ root: Page ) {
         super.beginRender(root)
