@@ -43,7 +43,9 @@ public class Layout: AddProtocol {
             rootItem.meassure( context )
             // This triggers resizing in children that has flex
             rootItem.setDimension( rootItem.dimensions )
-            let coords = context.beginCoords()
+            context.currentPage = page
+            //let coords = context.beginCoords()
+            let coords = Vector2D(x: 0.0, y: 0.0)
             rootItem.setCoordinates( coords.x, coords.y )
         
             if page != nil {
