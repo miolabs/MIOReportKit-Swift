@@ -54,9 +54,15 @@ public class PDFRender_CoreGraphics: RenderContext
         resourcesPath = path
     }
     
+<<<<<<< HEAD
     /*public override func beginCoords ( ) -> Vector2D {
         return Vector2D( x: 0, y: Float( currentPage + 1 ) * A4.landscapeSize.height )
     }*/
+=======
+    public override func beginCoords ( ) -> Vector2D {
+        return Vector2D( x: 0, y: Float( currentPageNumber + 1 ) * currentPage!.size.height )
+    }
+>>>>>>> 4fa75c1652a03dedc3b0e046f2c98058d4d7a994
     
     public override func beginRender(_ root: Page ) {
         super.beginRender(root)
@@ -75,9 +81,9 @@ public class PDFRender_CoreGraphics: RenderContext
         
         context = UIGraphicsGetCurrentContext()
         
-        UIGraphicsBeginPDFPage()
-        
     }
+    
+    
     
     public override func endRender() {
         super.endRender()
@@ -449,7 +455,9 @@ public class PDFRender_CoreGraphics: RenderContext
     
     open override func beginPage ( _ page: Page ) {
         super.beginPage( page )
+        UIGraphicsBeginPDFPage()
 //        pdf.beginPage(options: "width=a4.width height=a4.height")
+        
     }
     
     
