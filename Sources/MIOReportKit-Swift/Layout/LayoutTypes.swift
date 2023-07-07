@@ -184,7 +184,8 @@ open class RenderContext {
     var contraintStack: [Constraint]
     var containerStack: [Container<LayoutItem>]
     var translations: [String:String]
-    var currentPage: Int
+    var currentPageNumber: Int
+    var currentPage: Page?
     
     public init ( _ trans: [String:String] = [:] ) {
         fgColor = "#000000"
@@ -195,7 +196,7 @@ open class RenderContext {
         contraintStack = []
         containerStack = []
         translations = trans
-        currentPage = 0
+        currentPageNumber = 0
     }
             
     open func beginCoords ( ) -> Vector2D { return Vector2D( x: 0, y: 0 ) }
@@ -219,8 +220,8 @@ open class RenderContext {
     
     open func setResourcesPath( _ path:String ) { }
         
-    open func beginPage ( _ page: Page ) { }
-    open func endPage   ( _ page: Page ) { currentPage += 1 }
+    open func beginPage ( _ page: Page ) { currentPage = page }
+    open func endPage   ( _ page: Page ) { currentPageNumber += 1 }
     
     // MARK: - Translations
     
