@@ -35,7 +35,7 @@ public class PDFRender_PDFLib: RenderContext
     }
     
     public override func beginCoords ( ) -> Vector2D {
-        return Vector2D( x: 0, y: Float( currentPage + 1 ) * PDF.A4.height )
+        return Vector2D( x: 0, y: Float( currentPageNumber + 1 ) * (currentPage?.size.height ?? 0))
     }
 
     public override func beginRender(_ root: Page ) {
