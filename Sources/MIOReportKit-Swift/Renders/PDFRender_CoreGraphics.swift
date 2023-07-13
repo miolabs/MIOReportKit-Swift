@@ -380,7 +380,7 @@ public class PDFRender_CoreGraphics: RenderContext
     }
     
     
-    let fontSize:[Double] = [0, 4, 8, 8, 10, 14, 18, 24, 36]
+    let fontSize:[Double] = [0, 2, 4, 6, 10, 14, 18, 24, 36]
     func fontSizeInPoints( _ size:ItemSize ) -> Double { return fontSize[ size.rawValue ] }
     var defaultFontSize:Double { get { return fontSizeInPoints (.s ) } }
     
