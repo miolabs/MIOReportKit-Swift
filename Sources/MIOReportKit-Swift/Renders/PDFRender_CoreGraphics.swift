@@ -158,7 +158,8 @@ public class PDFRender_CoreGraphics: RenderContext
         //TODO: Hack to render rounded rectangle only with all the border > 0
         if t > 0 && l > 0 && b > 0 && r > 0 && item.style.borderRadius > 0 {
             setColor( fg, "stroke" )
-            let rdx = Double( item.style.borderRadius )
+            //let rdx = Double( item.style.borderRadius )
+            _ = Double( item.style.borderRadius )
 //            pdf.moveTo( x: p.x + rdx, y: p.y)
 //            pdf.lineTo( x: p.x + Double( item.dimensions.width ) - rdx, y: p.y )
 //            pdf.arc   ( x: p.x + Double( item.dimensions.width ) - rdx, y: p.y + rdx, radius: rdx, alpha: 270, beta: 360 )
@@ -350,7 +351,7 @@ public class PDFRender_CoreGraphics: RenderContext
 //                                    , options: opts.joined(separator: " "))
             }
         }
-        else if let img = item as? URLImage {
+//        else if let img = item as? URLImage {
 //            let r = URLRequest( urlString: img.url )
 //            let data = try? MIOCoreURLDataRequest_sync( r )
 //            print("*** URL Image retrieve data from url: \(img.url)")
@@ -371,7 +372,7 @@ public class PDFRender_CoreGraphics: RenderContext
 //                }
 //                pdf.deletePVF( filename: fn )
 //            }
-        }
+//        }
     }
         
     
