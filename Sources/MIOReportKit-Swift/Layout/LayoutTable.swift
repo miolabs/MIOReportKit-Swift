@@ -79,7 +79,7 @@ public class Table: FooterHeaderContainer< HStack<Text>, HStack<Text> > {
             let col = header!.children[ i ]
             
             let txt = Text( "\(dict[ key ] ?? "")", bold: bold, italic: italic, align: col.align, wrap: col.wrap )
-            if textColor != nil { txt.foregroundColor(textColor!) }
+            if textColor != nil { _ = txt.foregroundColor(textColor!) }
             table_row.add( txt )
         }
         

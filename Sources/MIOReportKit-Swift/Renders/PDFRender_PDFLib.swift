@@ -296,9 +296,13 @@ public class PDFRender_PDFLib: RenderContext
             }
         }
         else if let img = item as? URLImage {
-            let r = URLRequest( urlString: img.url )
-            let data = try? MIOCoreURLDataRequest_sync( r )
-            print("*** URL Image retrieve data from url: \(img.url)")
+            var data = cachedImagesData[img.url]
+            if data == nil {
+                let r = URLRequest( urlString: img.url )
+                data = try? MIOCoreURLDataRequest_sync( r )
+                print("*** URL Image retrieve data from url: \(img.url)")
+                cachedImagesData[img.url] = data
+            }
             if data != nil {
                 let fn = String( img.url.split(separator: "/").last! )
                 pdf.createPVF( filename: fn, data: data! )
@@ -318,6 +322,8 @@ public class PDFRender_PDFLib: RenderContext
             }
         }
     }
+    
+    var cachedImagesData: [String:Data] = [:]
     
     
     func clip ( _ item: LayoutItem ) -> Bool {
