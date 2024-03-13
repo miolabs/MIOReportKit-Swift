@@ -43,7 +43,7 @@ public class PDFRender_PDFLib: RenderContext
         
         try? pdf.beginDocument( )
         if resourcesPath != nil {
-            pdf.setParameter(key: "SearchPath", value: resourcesPath!)
+            pdf.setOption(options: "SearchPath={{\(resourcesPath!)}}" )
         }
         
         //        defaultFont = (try? pdf.loadFont(name: "Arial", encoding: "winansi", options: "embedding") ) ?? -1
@@ -78,7 +78,7 @@ public class PDFRender_PDFLib: RenderContext
         
         if container is A4 {
             pdf.setFont( defaultFont, size: defaultFontSize )
-            pdf.setParameter(key: "stringformat", value: "utf8")
+            pdf.setOption(options: "stringformat=utf8" )
         }
         else if let table = container as? Table {
             
