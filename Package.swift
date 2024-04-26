@@ -7,7 +7,7 @@ import PackageDescription
 let package = Package(
     name: "MIOReportKit-Swift",
     platforms: [
-        .macOS(.v11), .iOS(.v13)
+        .macOS(.v11)
     ],
     products: [
         // Products define the executables and libraries a package produces, and make them visible to other packages.
@@ -16,7 +16,7 @@ let package = Package(
             targets: ["MIOReportKit-Swift"]),
     ],
     dependencies: [
-        .package( url: "https://github.com/miolabs/MIOCore.git", .branch("master") ),
+        .package( url: "https://github.com/miolabs/MIOCore.git", .branch("context") ),
         .package( url: "https://github.com/miolabs/PDFLib-Swift.git", .branch("main") )
     ],
     targets: [
