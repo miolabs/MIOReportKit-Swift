@@ -27,7 +27,9 @@ let package = Package(
             dependencies: [
                 .product(name: "MIOCore", package: "MIOCore" ),
                 .product(name: "PDFLib-Swift", package: "PDFLib-Swift", condition: .when( platforms: [.macOS, .linux] ) )
-            ] ),
+            ],
+            swiftSettings: [.define( "PDFLIB_7" )]
+        ),
         .testTarget(
             name: "MIOReportKit-SwiftTests",
             dependencies: ["MIOReportKit-Swift"]),
