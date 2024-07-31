@@ -55,7 +55,7 @@ public class PDFRender_PDFLib: RenderContext
         defaultFontBold = (try? pdf.loadFont(name: "FreeSansBold" ) ) ?? -1
         defaultFontItalic = (try? pdf.loadFont(name: "FreeSansOblique" ) ) ?? -1
         defaultFontBoldItalic = (try? pdf.loadFont(name: "FreeSansBoldOblique" ) ) ?? -1
-        if defaultFont == -1 || defaultFontBold == -1 || defaultFontItalic == -1 || defaultFontBoldItalic = -1 {
+        if defaultFont == -1 || defaultFontBold == -1 || defaultFontItalic == -1 || defaultFontBoldItalic == -1 {
             print("MIOReportKit: Error. cant find fonts. Using default one")
         }
         #else
