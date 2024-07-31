@@ -47,6 +47,9 @@ public class PDFRender_PDFLib: RenderContext
             pdf.setParameter(key: "SearchPath", value: resourcesPath!)
             #else
             pdf.setOption( options: "SearchPath={{\(resourcesPath!)}}" )
+            #if os(Linux)
+            pdf.setOption( options: "SearchPath={{/usr/share/fonts/truetype/freefont/}}" )
+            #endif
             #endif
         }
         
@@ -236,17 +239,14 @@ public class PDFRender_PDFLib: RenderContext
         return _align[ align.rawValue ]
     }
     
-    private func defaultFont(_ bold: Bool, _ italic: Bool) -> Int32 {
-        if bold && italic {
-            return defaultFontBoldItalic
-        } else if bold {
-            return defaultFontBold
-        } else if italic {
-            return defaultFontItalic
-        }
+    private func defaultFont(_ bold: Bool, _ italic: Bool) -> Int32 
+    {
+        if      bold && italic { return defaultFontBoldItalic }
+        else if bold           { return defaultFontBold       }
+        else if italic         { return defaultFontItalic     }
+        
         return defaultFont
     }
-    
     
     override open func renderItem ( _ item: LayoutItem ) {
         rect( item )
@@ -259,7 +259,7 @@ public class PDFRender_PDFLib: RenderContext
             let fs = fontSizeInPoints(text.text_size)
             var opts:[String] = []
             
-            opts.append("font=\( defaultFont(text.bold, text.italic))" )
+            opts.append("font={\( defaultFont(text.bold, text.italic))}" )
             opts.append("fontsize=\(fs)")
             if text.style.fgColor != nil {
                 let (r,g,b,_) = parse_color(text.style.fgColor!)
