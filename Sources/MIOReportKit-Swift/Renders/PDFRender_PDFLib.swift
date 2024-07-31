@@ -50,11 +50,20 @@ public class PDFRender_PDFLib: RenderContext
             #endif
         }
         
-        //        defaultFont = (try? pdf.loadFont(name: "Arial", encoding: "winansi", options: "embedding") ) ?? -1
+        #if os(Linux)
+        defaultFont = (try? pdf.loadFont(name: "FreeSans" ) ) ?? -1
+        defaultFontBold = (try? pdf.loadFont(name: "FreeSansBold" ) ) ?? -1
+        defaultFontItalic = (try? pdf.loadFont(name: "FreeSansOblique" ) ) ?? -1
+        defaultFontBoldItalic = (try? pdf.loadFont(name: "FreeSansBoldOblique" ) ) ?? -1
+        if defaultFont == -1 || defaultFontBold == -1 || defaultFontItalic == -1 || defaultFontBoldItalic = -1 {
+            print("MIOReportKit: Error. cant find fonts. Using default one")
+        }
+        #else
         defaultFont = (try? pdf.loadFont(name: "Helvetica" ) ) ?? -1
         defaultFontBold = (try? pdf.loadFont(name: "Helvetica-Bold" ) ) ?? -1
         defaultFontItalic = (try? pdf.loadFont(name: "Helvetica-Oblique" ) ) ?? -1
         defaultFontBoldItalic = (try? pdf.loadFont(name: "Helvetica-BoldOblique" ) ) ?? -1
+        #endif
         
         pageMargin = root.margins
         offsetY = PDF.A4.height - root.margins.top - root.margins.bottom
