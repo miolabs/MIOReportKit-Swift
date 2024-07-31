@@ -255,10 +255,10 @@ open class RenderContext {
         
         currency_formatter = NumberFormatter()
         currency_formatter!.locale = Locale(identifier: locale_id )
-        // PDFLib 7 not print with Euro symbol
         currency_formatter!.numberStyle = .currency
 //        currency_formatter!.numberStyle = .decimal
-        currency_formatter!.currencySymbol = ""
+        // PDFLib 7 not print with Euro symbol
+//        currency_formatter!.currencySymbol = ""
         currency_formatter!.minimumFractionDigits = 2
         currency_formatter!.maximumFractionDigits = 2
        
@@ -267,7 +267,7 @@ open class RenderContext {
     
     open func stringCurrency ( from value: NSDecimalNumber? ) -> String {
         let number = NSNumber( floatLiteral: value?.doubleValue ?? 0 )
-//        let str = currencyFromatter.string(from: number)! + " " + currencyFromatter.currencySymbol!
+//        return currencyFromatter.string(from: number)!.trimmingCharacters(in: .whitespacesAndNewlines) + " €" //+ currencyFromatter.currencySymbol!
         return currencyFromatter.string(from: number)!
     }
     

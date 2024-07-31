@@ -46,15 +46,15 @@ public class PDFRender_PDFLib: RenderContext
             #if PDFLIB_7
             pdf.setParameter(key: "SearchPath", value: resourcesPath!)
             #else
-            pdf.setOption(options: "SearchPath={{\(resourcesPath!)}}" )
+            pdf.setOption( options: "SearchPath={{\(resourcesPath!)}}" )
             #endif
         }
         
         //        defaultFont = (try? pdf.loadFont(name: "Arial", encoding: "winansi", options: "embedding") ) ?? -1
-        defaultFont = (try? pdf.loadFont(name: "Helvetica", encoding: "winansi" ) ) ?? -1
-        defaultFontBold = (try? pdf.loadFont(name: "Helvetica-Bold", encoding: "winansi") ) ?? -1
-        defaultFontItalic = (try? pdf.loadFont(name: "Helvetica-Oblique", encoding: "winansi") ) ?? -1
-        defaultFontBoldItalic = (try? pdf.loadFont(name: "Helvetica-BoldOblique", encoding: "winansi") ) ?? -1
+        defaultFont = (try? pdf.loadFont(name: "Helvetica" ) ) ?? -1
+        defaultFontBold = (try? pdf.loadFont(name: "Helvetica-Bold" ) ) ?? -1
+        defaultFontItalic = (try? pdf.loadFont(name: "Helvetica-Oblique" ) ) ?? -1
+        defaultFontBoldItalic = (try? pdf.loadFont(name: "Helvetica-BoldOblique" ) ) ?? -1
         
         pageMargin = root.margins
         offsetY = PDF.A4.height - root.margins.top - root.margins.bottom
@@ -85,7 +85,7 @@ public class PDFRender_PDFLib: RenderContext
             #if PDFLIB_7
             pdf.setParameter(key: "stringformat", value: "utf8")
             #else
-            pdf.setOption(options: "stringformat=utf8" )
+//            pdf.setOption(options: "stringformat=utf8" )
             #endif
         }
         else if let table = container as? Table {
