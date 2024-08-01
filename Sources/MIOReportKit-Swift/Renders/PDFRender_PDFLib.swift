@@ -43,13 +43,16 @@ public class PDFRender_PDFLib: RenderContext
         
         try? pdf.beginDocument( )
         if resourcesPath != nil {
-            #if PDFLIB_7
-            pdf.setParameter(key: "SearchPath", value: resourcesPath!)
-            #else
+            #if PDFLIB_7 && !os(Linux)
+            pdf.setParameter( key: "SearchPath", value: resourcesPath!)
+            #elseif PDFLIB_7 && os(Linux)
+            pdf.setParameter( key: "SearchPath", value: resourcesPath!)
+            pdf.setParameter( key: "SearchPath", value: "/usr/share/fonts/truetype/freefont/" )
+            #elseif !PDFLIB_7 && !os(Linux)
             pdf.setOption( options: "SearchPath={{\(resourcesPath!)}}" )
-            #if os(Linux)
+            #elseif !PDFLIB_7 && os(Linux)
+            pdf.setOption( options: "SearchPath={{\(resourcesPath!)}}" )
             pdf.setOption( options: "SearchPath={{/usr/share/fonts/truetype/freefont/}}" )
-            #endif
             #endif
         }
         
