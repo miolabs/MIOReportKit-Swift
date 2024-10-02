@@ -327,12 +327,12 @@ public class PDFRender_PDFLib: RenderContext
             
             if data != nil
             {
-                let fn = "/pvf/image/" + String( img.url.split(separator: "/").last! )
+                let fn = "/pvf/image/" + String( img.url.split(separator: "/").last! ).components(separatedBy: ".").first!
                 pdf.createPVF( filename: fn, data: data! )
                 print("*** URL Image create pvf PDFLIB: \(fn)")
                 do {
                     let image = try pdf.loadGraphics(fileName: fn )
-                    print("*** URL Image load image PDFLIB")
+                    print("*** URL Image load image PDFLIB: \(fn)")
                     let pos = self.pos( img )
                     pdf.fitGraphics( image, x: pos.x, y: pos.y, options: "boxsize={\(item.dimensions.width) \(item.dimensions.height)} fitmethod=auto position={ \(imageAlignString ( img.align ) ) center }")
                     //                    pdf.fitImage(image: image, x: pos.x, y: pos.y, options: "boxsize={\(item.dimensions.width) \(item.dimensions.height)} fitmethod=auto")
