@@ -317,23 +317,26 @@ public class PDFRender_PDFLib: RenderContext
         }
         else if let img = item as? URLImage {
             var data = cachedImagesData[img.url]
-            if data == nil {
+            if data == nil
+            {
                 let r = URLRequest( urlString: img.url )
                 data = try? MIOCoreURLDataRequest_sync( r )
                 print("*** URL Image retrieve data from url: \(img.url)")
                 cachedImagesData[img.url] = data
             }
-            if data != nil {
-                let fn = String( img.url.split(separator: "/").last! )
+            
+            if data != nil
+            {
+                let fn = "/pvf/image/" + String( img.url.split(separator: "/").last! )
                 pdf.createPVF( filename: fn, data: data! )
                 print("*** URL Image create pvf PDFLIB: \(fn)")
                 do {
-                    let image = try pdf.loadImage(fileName: fn )
+                    let image = try pdf.loadGraphics(fileName: fn )
                     print("*** URL Image load image PDFLIB")
                     let pos = self.pos( img )
-                    pdf.fitImage(image: image, x: pos.x, y: pos.y, options: "boxsize={\(item.dimensions.width) \(item.dimensions.height)} fitmethod=auto position={ \(imageAlignString ( img.align ) ) center }")
+                    pdf.fitGraphics( image, x: pos.x, y: pos.y, options: "boxsize={\(item.dimensions.width) \(item.dimensions.height)} fitmethod=auto position={ \(imageAlignString ( img.align ) ) center }")
                     //                    pdf.fitImage(image: image, x: pos.x, y: pos.y, options: "boxsize={\(item.dimensions.width) \(item.dimensions.height)} fitmethod=auto")
-                    pdf.closeImage( image: image )
+                    pdf.closeGraphics( image )
                 }
                 catch {
                     print( "*** URL Image error: \(error.localizedDescription)")
