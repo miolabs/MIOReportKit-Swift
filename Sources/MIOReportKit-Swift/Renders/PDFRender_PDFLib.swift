@@ -329,7 +329,15 @@ public class PDFRender_PDFLib: RenderContext
             {
                 let fn = "/pvf/image/" + String( img.url.split(separator: "/").last! ).components(separatedBy: ".").first!
                 pdf.createPVF( filename: fn, data: data! )
-                print("*** URL Image create pvf PDFLIB: \(fn)")
+                print("*** URL Image create pvf PDFLIB: \(fn) (\(data!.count))")
+                let hex_data = data!.map {
+                    if $0 < 16 {
+                        return "0" + String($0, radix: 16)
+                    } else {
+                        return String($0, radix: 16)
+                    }
+                }.joined()
+                print( "*** URL Image hex data: \(hex_data)" )
                 do {
                     let image = try pdf.loadGraphics(fileName: fn )
                     print("*** URL Image load image PDFLIB: \(fn)")
