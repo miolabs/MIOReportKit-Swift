@@ -327,9 +327,22 @@ public class PDFRender_PDFLib: RenderContext
             
             if data != nil
             {
-                let fn = "/pvf/image/" + String( img.url.split(separator: "/").last! ).components(separatedBy: ".").first!
-                pdf.createPVF( filename: fn, data: data! )
-                print("*** URL Image create pvf PDFLIB: \(fn) (\(data!.count))")
+             
+                let fn = String( img.url.split( separator: "/" ).last! )//.components( separatedBy: "." ).first!
+             
+                // WORKAROUND: Save the file in a temp folder a load. It's a bug in Linux
+//                do {
+//                    try data!.write(to: URL(fileURLWithPath: "/tmp/\(fn)"))
+//                }
+//                catch {
+//                    print("*** URL Image write temp file error: \(error)")
+//                    return
+//                }
+                // WORKAROUND
+                
+                let path = "/pvf/image/" + fn
+                pdf.createPVF( filename: path, data: data! )
+                print("*** URL Image create pvf PDFLIB: \(path) (\(data!.count))")
                 let hex_data = data!.map {
                     if $0 < 16 {
                         return "0" + String($0, radix: 16)
@@ -339,17 +352,17 @@ public class PDFRender_PDFLib: RenderContext
                 }.joined()
                 print( "*** URL Image hex data: \(hex_data)" )
                 do {
-                    let image = try pdf.loadGraphics(fileName: fn )
-                    print("*** URL Image load image PDFLIB: \(fn)")
+                    let image = try pdf.loadImage(fileName: path )
+                    print("*** URL Image load image PDFLIB: \(path)")
                     let pos = self.pos( img )
-                    pdf.fitGraphics( image, x: pos.x, y: pos.y, options: "boxsize={\(item.dimensions.width) \(item.dimensions.height)} fitmethod=auto position={ \(imageAlignString ( img.align ) ) center }")
+                    pdf.fitImage( image, x: pos.x, y: pos.y, options: "boxsize={\(item.dimensions.width) \(item.dimensions.height)} fitmethod=auto position={ \(imageAlignString ( img.align ) ) center }")
                     //                    pdf.fitImage(image: image, x: pos.x, y: pos.y, options: "boxsize={\(item.dimensions.width) \(item.dimensions.height)} fitmethod=auto")
-                    pdf.closeGraphics( image )
+                    pdf.closeImage( image )
                 }
                 catch {
                     print( "*** URL Image error: \(error.localizedDescription)")
                 }
-                pdf.deletePVF( filename: fn )
+                pdf.deletePVF( filename: path )
             }
         }
     }
