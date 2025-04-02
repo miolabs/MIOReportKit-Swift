@@ -379,9 +379,19 @@ public class PDFRender_CoreGraphics: RenderContext
     func clip ( _ item: LayoutItem ) -> Bool {
         return false // item.absPosition().y < 0
     }
+    /*
+     case none = 0
+     case xxs  = 1
+     case xs   = 2
+     case s    = 3
+     case m    = 4
+     case l    = 5
+     case xl   = 6
+     case xxl  = 7
+     case h    = 8 // huge
+     */
     
-    
-    let fontSize:[Double] = [0, 2, 4, 6, 10, 14, 18, 24, 36]
+    let fontSize:[Double] = [0, 4, 6, 8, 10, 14, 18, 24, 36]
     func fontSizeInPoints( _ size:ItemSize ) -> Double { return fontSize[ size.rawValue ] }
     var defaultFontSize:Double { get { return fontSizeInPoints (.s ) } }
     

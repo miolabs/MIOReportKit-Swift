@@ -14,7 +14,7 @@ public enum SizeGrowDirection: Int16 {
 }
 
 
-public enum ItemSize: Int {
+@objc public enum ItemSize: Int {
     case none = 0
     case xxs  = 1
     case xs   = 2
